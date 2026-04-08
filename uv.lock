@@ -37,7 +37,7 @@ requires-dist = [{ name = "kindling", git = "https://github.com/Monster0506/kind
 [[package]]
 name = "kindling"
 version = "0.1.0"
-source = { git = "https://github.com/Monster0506/kindling.git#0f6342ecb1d6bda1372f50d7d6e3bb4ddf4ac165" }
+source = { git = "https://github.com/Monster0506/kindling.git#c1886d90df6ca2707e0870f6d3f35d982db82ab0" }
 dependencies = [
     { name = "h11" },
     { name = "jinja2" },
@@ -99,4 +99,4 @@ wheels = [
 [[package]]
 name = "signals"
 version = "0.1.0"
-source = { git = "https://github.com/Monster0506/kindling.git?subdirectory=signals#0f6342ecb1d6bda1372f50d7d6e3bb4ddf4ac165" }
+source = { git = "https://github.com/Monster0506/kindling.git?subdirectory=signals#c1886d90df6ca2707e0870f6d3f35d982db82ab0" }
