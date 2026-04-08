@@ -1,4 +1,7 @@
+from db import init_db
 from kindling import Application
+
+init_db()
 
 app = Application(template_dir="templates")
 app.static("/static", "static")
