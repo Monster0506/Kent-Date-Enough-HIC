@@ -58,10 +58,12 @@ body {
 
 body.landing {
     overflow: hidden;
-    background-color: var(--light-yellow);
+    background-color: var(--dark-blue);
 }
 
 .landing-hero {
+    position: relative;
+    z-index: 1;
     display: flex;
     width: 100vw;
     height: 100vh;
@@ -71,7 +73,7 @@ body.landing {
 
 .landing-center {
     flex: 1;
-    background-color: var(--light-yellow);
+    background-color: transparent;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -101,4 +103,16 @@ body.landing {
     display: flex;
     gap: 1rem;
     margin-top: 2.5rem;
+}
+
+.landing-actions .btn-primary {
+    background-color: var(--dark-yellow);
+    color: var(--dark-blue);
+    border-color: var(--dark-yellow);
+}
+
+.landing-actions .btn-secondary {
+    background-color: transparent;
+    color: var(--light-yellow);
+    border-color: var(--light-yellow);
 }
