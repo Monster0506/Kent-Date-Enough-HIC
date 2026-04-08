@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Log In — Kent Date Enough{% endblock %}
+{% block body_class %}auth{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/auth.css">
+{% endblock %}
+
+{% block content %}
+{% include '_bolt_bg.html' %}
+
+<div class="auth-card">
+    <h1 class="auth-title">Log In</h1>
+    <form method="post" action="/login">
+        <div class="field">
+            <input type="text" name="username" placeholder="Username" required autocomplete="username">
+        </div>
+        <div class="field">
+            <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
+        </div>
+        {% if error %}
+        <p class="auth-error">{{ error }}</p>
+        {% endif %}
+        <button type="submit" class="btn btn-primary auth-submit">Log In ↗</button>
+    </form>
+    <p class="auth-footer">Don't have an account? <a href="/signup">Sign Up</a></p>
+</div>
+{% endblock %}
