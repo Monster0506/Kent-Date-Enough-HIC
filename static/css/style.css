@@ -1,0 +1,34 @@
+/* ── Color palette ───────────────────────────────────────── */
+:root {
+    --dark-yellow:  #EAAB00;
+    --light-yellow: #FEEAD1;
+    --dark-blue:    #023672;
+    --gold:         #A17002;
+    --light-blue:   #BBC7DF;
+    --red:          #FEB8B8;
+    --green:        #BCFEB8;
+    --black:        #000000;
+    --white:        #FFFFFF;
+    --danger-red:   #FB2D30;
+    --light-gray:   #CFCFCF;
+}
+
+/* ── Reset ───────────────────────────────────────────────── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ── Base ────────────────────────────────────────────────── */
+body {
+    font-family: sans-serif;
+    background-color: var(--light-yellow);
+    color: var(--black);
+    min-height: 100vh;
+}
+
+.page-content {
+    width: 100%;
+    min-height: 100vh;
+}
