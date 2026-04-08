@@ -1,0 +1,115 @@
+body.signup {
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+body.signup .page-content {
+    display: flex;
+    align-items: center;
+    justify-content: center; width: 100%;
+    min-height: 100vh;
+}
+
+.auth-bg {
+    position: fixed;
+    inset: 0;
+    background-color: var(--dark-blue);
+    z-index: 0;
+}
+
+.auth-bg svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.auth-bg .right-side {
+    fill: var(--dark-yellow);
+}
+
+.auth-bg .lightning-bolt {
+    fill: none;
+    stroke: var(--light-yellow);
+    stroke-width: 8px;
+    stroke-linejoin: miter;
+    stroke-linecap: square;
+    filter: drop-shadow(0px 0px 8px #FEEAD1) drop-shadow(0px 0px 15px #EAAB00);
+}
+
+.auth-card {
+    position: relative;
+    z-index: 1;
+    background-color: var(--light-yellow);
+    border: 2px solid var(--light-blue);
+    border-radius: 6px;
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 340px;
+}
+
+.auth-title {
+    font-family: 'Jura', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark-blue);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.field {
+    margin-bottom: 0.85rem;
+}
+
+.field input {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1.5px solid var(--light-blue);
+    border-radius: 4px;
+    background-color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: var(--black);
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.field input:focus {
+    border-color: var(--dark-blue);
+}
+
+.field input::placeholder {
+    color: var(--light-gray);
+}
+
+.auth-submit {
+    width: 100%;
+    margin-top: 0.5rem;
+    text-align: center;
+}
+
+.auth-error {
+    font-size: 0.85rem;
+    color: var(--danger-red);
+    margin-bottom: 0.75rem;
+}
+
+.auth-footer {
+    margin-top: 1.25rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--dark-blue);
+}
+
+.auth-footer a {
+    color: var(--gold);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}

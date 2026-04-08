@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up — Kent Date Enough{% endblock %}
+{% block body_class %}signup{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/signup.css">
+{% endblock %}
+
+{% block content %}
+<div class="auth-bg">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <polygon class="right-side" points="
+            100,0
+            100,100
+            32,100
+            49,85
+            25,85
+            56,70
+            30,70
+            63,52
+            35,52
+            71,33
+            41,33
+            78,16
+            46,16
+            68,0"
+        />
+        <polyline class="lightning-bolt" points="
+            68,0
+            46,16
+            78,16
+            41,33
+            71,33
+            35,52
+            63,52
+            30,70
+            56,70
+            25,85
+            49,85
+            32,100"
+            vector-effect="non-scaling-stroke"
+        />
+    </svg>
+</div>
+
+<div class="auth-card">
+    <h1 class="auth-title">Sign Up</h1>
+    <form method="post" action="/signup">
+        <div class="field">
+            <input type="text" name="username" placeholder="Username" required autocomplete="username">
+        </div>
+        <div class="field">
+            <input type="password" name="password" placeholder="Password" required autocomplete="new-password">
+        </div>
+        <div class="field">
+            <input type="password" name="confirm_password" placeholder="Confirm Password" required autocomplete="new-password">
+        </div>
+        {% if error %}
+        <p class="auth-error">{{ error }}</p>
+        {% endif %}
+        <button type="submit" class="btn btn-primary auth-submit">Sign Up ↗</button>
+    </form>
+    <p class="auth-footer">Already have an account? <a href="/login">Log In</a></p>
+</div>
+{% endblock %}
