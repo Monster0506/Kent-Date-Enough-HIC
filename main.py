@@ -1,5 +1,6 @@
 from db import get_conn, hash_password, init_db, verify_password
 from kindling import Application
+from kindling.reactive import on, signal
 from kindling.response import Response, redirect
 from session import get_session, set_session_header
 
@@ -14,38 +15,43 @@ def landing(req):
     return app.render("landing.html")
 
 
-@app.get("/signup")
-def signup_get(req):
-    return app.render("signup.html", error=None)
+# ── Signup (reactive) ─────────────────────────────────────────────────────────
+with app.reactive("signup", path="/signup", template="signup.html") as _signup:
+    _error   = signal("")
+    _success = signal(False)
+    _signup.expose(error=_error, success=_success)
+
+    @on("signup-form", "submit")
+    def handle_signup(req):
+        username = (req.form_value("username") or "").strip()
+        password = req.form_value("password") or ""
+        confirm  = req.form_value("confirm_password") or ""
+        _error.value   = ""
+        _success.value = False
+
+        if not username or not password:
+            _error.value = "Username and password are required."
+            return
+        if password != confirm:
+            _error.value = "Passwords do not match."
+            return
+        if len(password) < 6:
+            _error.value = "Password must be at least 6 characters."
+            return
+
+        with get_conn() as conn:
+            if conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone():
+                _error.value = "Username already taken."
+                return
+            conn.execute(
+                "INSERT INTO users (username, password_hash) VALUES (?, ?)",
+                (username, hash_password(password)),
+            )
+
+        _success.value = True
 
 
-@app.post("/signup")
-def signup_post(req):
-    username = (req.form_value("username") or "").strip()
-    password = req.form_value("password") or ""
-    confirm  = req.form_value("confirm_password") or ""
-
-    if not username or not password:
-        return app.render("signup.html", error="Username and password are required.")
-    if password != confirm:
-        return app.render("signup.html", error="Passwords do not match.")
-    if len(password) < 6:
-        return app.render("signup.html", error="Password must be at least 6 characters.")
-
-    with get_conn() as conn:
-        existing = conn.execute(
-            "SELECT id FROM users WHERE username = ?", (username,)
-        ).fetchone()
-        if existing:
-            return app.render("signup.html", error="Username already taken.")
-        conn.execute(
-            "INSERT INTO users (username, password_hash) VALUES (?, ?)",
-            (username, hash_password(password)),
-        )
-
-    return redirect("/login")
-
-
+# ── Login ─────────────────────────────────────────────────────────────────────
 @app.get("/login")
 def login_get(req):
     return app.render("login.html", error=None)

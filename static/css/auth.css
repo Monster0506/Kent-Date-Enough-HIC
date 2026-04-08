@@ -66,6 +66,22 @@ body.auth .page-content {
     text-align: center;
 }
 
+.auth-success {
+    font-size: 0.95rem;
+    color: var(--dark-blue);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.pw-hint {
+    font-size: 0.78rem;
+    margin-top: 0.3rem;
+    min-height: 1em;
+}
+
+.pw-match    { color: var(--gold); }
+.pw-mismatch { color: var(--danger-red); }
+
 .auth-error {
     font-size: 0.85rem;
     color: var(--danger-red);
