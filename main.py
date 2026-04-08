@@ -1,6 +1,7 @@
 from db import get_conn, hash_password, init_db, verify_password
 from kindling import Application
-from kindling.response import redirect
+from kindling.response import Response, redirect
+from session import get_session, set_session_header
 
 init_db()
 
@@ -43,6 +44,35 @@ def signup_post(req):
         )
 
     return redirect("/login")
+
+
+@app.get("/login")
+def login_get(req):
+    return app.render("login.html", error=None)
+
+
+@app.post("/login")
+def login_post(req):
+    username = (req.form_value("username") or "").strip()
+    password = req.form_value("password") or ""
+
+    if not username or not password:
+        return app.render("login.html", error="Please enter your username and password.")
+
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT id, password_hash FROM users WHERE username = ?", (username,)
+        ).fetchone()
+
+    if not row or not verify_password(password, row["password_hash"]):
+        return app.render("login.html", error="Invalid username or password.")
+
+    resp = redirect("/discover")
+    return Response(
+        status=resp.status,
+        headers=resp.headers + (set_session_header(row["id"]),),
+        body=resp.body,
+    )
 
 
 if __name__ == "__main__":
