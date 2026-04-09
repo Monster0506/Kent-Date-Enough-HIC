@@ -1,8 +1,9 @@
-from db import get_conn, hash_password, init_db, verify_password
+from db import get_conn, get_next_profile, hash_password, init_db, record_swipe, verify_password
 from kindling import Application
 from kindling.reactive import on, signal
+from urllib.parse import quote as _url_quote
 from kindling.response import Response, redirect
-from session import get_session, set_session_header
+from session import clear_session_header, get_session, set_session_header
 
 init_db()
 
@@ -15,7 +16,6 @@ def landing(req):
     return app.render("landing.html")
 
 
-# ── Signup (reactive) ─────────────────────────────────────────────────────────
 with app.reactive("signup", path="/signup", template="signup.html") as _signup:
     _error   = signal("")
     _success = signal(False)
@@ -51,7 +51,6 @@ with app.reactive("signup", path="/signup", template="signup.html") as _signup:
         _success.value = True
 
 
-# ── Login ─────────────────────────────────────────────────────────────────────
 @app.get("/login")
 def login_get(req):
     return app.render("login.html", error=None)
@@ -77,6 +76,45 @@ def login_post(req):
     return Response(
         status=resp.status,
         headers=resp.headers + (set_session_header(row["id"]),),
+        body=resp.body,
+    )
+
+
+@app.get("/discover")
+def discover_get(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    profile = get_next_profile(user_id)
+    toast   = req.query("toast") or ""
+    return app.render("discover.html", profile=profile, toast=toast)
+
+
+@app.post("/discover")
+def discover_post(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    action    = req.form_value("action") or ""
+    swiped_id = int(req.form_value("swiped_id") or 0)
+    toast = ""
+    if swiped_id:
+        if action == "accept":
+            matched = record_swipe(user_id, swiped_id, "right")
+            if matched:
+                toast = "It's a match!"
+        elif action == "reject":
+            record_swipe(user_id, swiped_id, "left")
+    dest = "/discover?toast=" + _url_quote(toast, safe="") if toast else "/discover"
+    return redirect(dest)
+
+
+@app.get("/logout")
+def logout(req):
+    resp = redirect("/")
+    return Response(
+        status=resp.status,
+        headers=resp.headers + (clear_session_header(),),
         body=resp.body,
     )
 

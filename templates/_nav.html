@@ -1,0 +1,57 @@
+<button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
+    <i class="fa-solid fa-bars"></i>
+</button>
+
+<div class="nav-overlay" id="nav-overlay"></div>
+<nav class="sidebar" id="sidebar" aria-hidden="true">
+    <button class="nav-close" id="nav-close" aria-label="Close menu">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+    <a href="/discover" class="sidebar-item {% if active_nav == 'discover' %}sidebar-active{% endif %}">
+        <i class="fa-solid fa-compass sidebar-icon"></i> Discover
+    </a>
+    <a href="/profile" class="sidebar-item {% if active_nav == 'profile' %}sidebar-active{% endif %}">
+        <i class="fa-solid fa-user sidebar-icon"></i> My Profile
+    </a>
+    <a href="/chats" class="sidebar-item {% if active_nav == 'chats' %}sidebar-active{% endif %}">
+        <i class="fa-solid fa-message sidebar-icon"></i> Chats
+    </a>
+    <a href="/testimonials" class="sidebar-item {% if active_nav == 'testimonials' %}sidebar-active{% endif %}">
+        <i class="fa-solid fa-star sidebar-icon"></i> Testimonials
+    </a>
+    <a href="/settings" class="sidebar-item {% if active_nav == 'settings' %}sidebar-active{% endif %}">
+        <i class="fa-solid fa-gear sidebar-icon"></i> Settings
+    </a>
+    <a href="/logout" class="sidebar-item sidebar-logout">
+        <i class="fa-solid fa-right-from-bracket sidebar-icon"></i> Logout
+    </a>
+</nav>
+
+<script>
+(function () {
+    var toggle  = document.getElementById('nav-toggle');
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('nav-overlay');
+    var close   = document.getElementById('nav-close');
+
+    function openNav() {
+        sidebar.classList.add('sidebar-open');
+        overlay.classList.add('overlay-active');
+        toggle.setAttribute('aria-expanded', 'true');
+        sidebar.setAttribute('aria-hidden', 'false');
+    }
+    function closeNav() {
+        sidebar.classList.remove('sidebar-open');
+        overlay.classList.remove('overlay-active');
+        toggle.setAttribute('aria-expanded', 'false');
+        sidebar.setAttribute('aria-hidden', 'true');
+    }
+
+    toggle.addEventListener('click', openNav);
+    close.addEventListener('click', closeNav);
+    overlay.addEventListener('click', closeNav);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeNav();
+    });
+})();
+</script>
