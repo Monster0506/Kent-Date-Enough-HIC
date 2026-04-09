@@ -48,6 +48,15 @@ def init_db() -> None:
                 body       TEXT    NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS swipes (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                swiper_id  INTEGER NOT NULL REFERENCES users(id),
+                swiped_id  INTEGER NOT NULL REFERENCES users(id),
+                direction  TEXT    NOT NULL CHECK(direction IN ('left','right')),
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(swiper_id, swiped_id)
+            );
         """)
 
 
@@ -55,6 +64,44 @@ def hash_password(password: str) -> str:
     salt = os.urandom(16)
     key = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 260_000)
     return salt.hex() + ":" + key.hex()
+
+
+def get_next_profile(user_id: int) -> dict | None:
+    with get_conn() as conn:
+        row = conn.execute(
+            """
+            SELECT id, username, name, major, height, about, photo_path
+            FROM users
+            WHERE id != ?
+              AND id NOT IN (
+                  SELECT swiped_id FROM swipes WHERE swiper_id = ?
+              )
+            ORDER BY created_at ASC
+            LIMIT 1
+            """,
+            (user_id, user_id),
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def record_swipe(swiper_id: int, swiped_id: int, direction: str) -> bool:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO swipes (swiper_id, swiped_id, direction) VALUES (?, ?, ?)",
+            (swiper_id, swiped_id, direction),
+        )
+        if direction == "right":
+            mutual = conn.execute(
+                "SELECT 1 FROM swipes WHERE swiper_id = ? AND swiped_id = ? AND direction = 'right'",
+                (swiped_id, swiper_id),
+            ).fetchone()
+            if mutual:
+                conn.execute(
+                    "INSERT INTO matches (user_a_id, user_b_id) VALUES (?, ?)",
+                    (swiper_id, swiped_id),
+                )
+                return True
+    return False
 
 
 def verify_password(password: str, stored: str) -> bool:
