@@ -10,4 +10,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-kindling = { git = "https://github.com/Monster0506/kindling.git" }
+kindling = { git = "https://github.com/Monster0506/kindling.git", rev = "ac0b98c" }
