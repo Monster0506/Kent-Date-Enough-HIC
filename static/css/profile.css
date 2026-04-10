@@ -1,0 +1,33 @@
+.profile-card {
+    max-width: 420px;
+}
+
+.profile-photo-preview {
+    text-align: center;
+    margin-bottom: 0.85rem;
+}
+
+.profile-photo-preview img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--light-blue);
+}
+
+.profile-about {
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    border: 1.5px solid var(--light-blue);
+    border-radius: 4px;
+    background: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: var(--black);
+    outline: none;
+    resize: vertical;
+}
+
+.profile-about:focus {
+    border-color: var(--dark-blue);
+}
