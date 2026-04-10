@@ -22,6 +22,7 @@ def init_db() -> None:
                 name          TEXT,
                 major         TEXT,
                 height        TEXT,
+                age           INTEGER,
                 about         TEXT,
                 photo_path    TEXT,
                 created_at    DATETIME DEFAULT CURRENT_TIMESTAMP

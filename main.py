@@ -1,3 +1,7 @@
+import os
+import uuid
+from multipart import parse_form_data
+
 from db import get_conn, get_next_profile, hash_password, init_db, record_swipe, verify_password
 from kindling import Application
 from kindling.reactive import on, signal
@@ -8,7 +12,31 @@ from session import clear_session_header, get_session, set_session_header
 init_db()
 
 app = Application(template_dir="templates")
+app.config.max_request_body_bytes = 10 * 1024 * 1024  # 10 MB
 app.static("/static", "static")
+
+PROFILE_IMAGES_DIR = os.path.join("static", "profile_images")
+os.makedirs(PROFILE_IMAGES_DIR, exist_ok=True)
+
+
+def _parse_form(req):
+    import io
+    environ = {
+        "wsgi.input": io.BytesIO(req.body),
+        "CONTENT_TYPE": req.header("content-type", "") or "",
+        "CONTENT_LENGTH": str(len(req.body)),
+        "REQUEST_METHOD": "POST",
+    }
+    return parse_form_data(environ)
+
+
+def _get_user(user_id):
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT username, name, major, height, age, about, photo_path FROM users WHERE id = ?",
+            (user_id,),
+        ).fetchone()
+    return dict(row) if row else {}
 
 
 @app.get("/")
@@ -49,6 +77,58 @@ with app.reactive("signup", path="/signup", template="signup.html") as _signup:
             )
 
         _success.value = True
+
+@app.get("/profile")
+def profile_get(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    return app.render("profile.html", user=_get_user(user_id), error=None, success=False)
+
+
+@app.post("/profile")
+def profile_post(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+
+    forms, files = _parse_form(req)
+
+    username = forms.get("username", "").strip()
+    name     = forms.get("name", "").strip()
+    major    = forms.get("major", "").strip()
+    height   = forms.get("height", "").strip()
+    about    = forms.get("about", "").strip()
+    age      = forms.get("age", "").strip()
+
+    if not name or not age:
+        return app.render("profile.html", user=_get_user(user_id), error="Name and age are required.", success=False)
+    if not age.isdigit() or int(age) < 18:
+        return app.render("profile.html", user=_get_user(user_id), error="You must be at least 18 years old.", success=False)
+
+    photo_path = None
+    photo_file = files.get("photo")
+    if photo_file and photo_file.filename:
+        ext = os.path.splitext(photo_file.filename)[1].lower() or ".jpg"
+        safe_image_name = f"{user_id}_{uuid.uuid4().hex}{ext}"
+        with open(os.path.join(PROFILE_IMAGES_DIR, safe_image_name), "wb") as f:
+            photo_file.file.seek(0)
+            f.write(photo_file.file.read())
+        photo_path = f"profile_images/{safe_image_name}"
+
+    with get_conn() as conn:
+        if photo_path:
+            conn.execute(
+                "UPDATE users SET username=?, name=?, major=?, height=?, age=?, about=?, photo_path=? WHERE id=?",
+                (username, name, major, height, int(age), about, photo_path, user_id),
+            )
+        else:
+            conn.execute(
+                "UPDATE users SET username=?, name=?, major=?, height=?, age=?, about=? WHERE id=?",
+                (username, name, major, height, int(age), about, user_id),
+            )
+
+    return app.render("profile.html", user=_get_user(user_id), error=None, success=True)
 
 
 @app.get("/login")
