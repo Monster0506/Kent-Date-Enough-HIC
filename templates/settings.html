@@ -1,0 +1,61 @@
+{%extends "base.html" %}
+
+{% block title %}Settings — Kent Date Enough{% endblock %}
+{% block body_class %}settings{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/settings.css">
+{% endblock %}
+
+{% block content %}
+
+<div class="card-wrapper">
+    <div class="settings-card left-card">
+        <div class="card-content">
+            <h1 class="card-header">Match With?</h1>
+            <h2>Majors</h2>
+            <form class="pref-form" name="matchSettings" method="POST" action="/settings">
+                <select id="majorsMatch" name="majorsMatchSelection">
+                    <option value="all">All Majors</option>
+                    <option value="same">Same Major</option>
+                </select>
+
+            <h2>Genders</h2>
+                <div>
+                    <input type="checkbox" id="genderSelectMen" name="genderSelectMen" value="Men">
+                    <label for="genderSelectMen">Men</label>
+                </div>
+
+                <div>
+                    <input type="checkbox" id="genderSelectWomen" name="genderSelectWomen" value="Women">
+                    <label for="genderSelectMen">Women</label>
+                </div>
+
+                <div>
+                    <input type="checkbox" id="genderSelectNB" name="genderSelectNB" value="NB">
+                    <label for="genderSelectMen">Nonbinary</label>
+                </div>
+
+                <div>
+                    <input type="checkbox" id="genderSelectOther" name="genderSelectOther" value="Other">
+                    <label for="genderSelectMen">Other</label>
+                </div>
+
+                <input class="btn btn-submit" type="submit" value="Submit">
+            </form>
+        </div>
+    </div>
+
+    <div class="settings-card right-card">
+        <div class="card-content">
+            <h1 class="card-header">Account Information</h1>
+            <h3>Username: </h3>
+            <h3>Password: </h3>
+            <button class="btn btn-danger-sm">Reset Password</button>
+
+            <h3>Created at: </h3>
+            <button class="btn btn-danger-lg btn-delete-acc">Delete Account</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
