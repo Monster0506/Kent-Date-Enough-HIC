@@ -132,7 +132,6 @@ def profile_post(req):
 
     return app.render("profile.html", user=_get_user(user_id), error=None, success=True)
 
-
 @app.get("/login")
 def login_get(req):
     return app.render("login.html", error=None)
@@ -209,6 +208,14 @@ def testimonials_get(req):
             """
         ).fetchall()
     return app.render("testimonials.html", testimonials=[dict(r) for r in rows])
+
+
+@app.get("/settings")
+def settings_get(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    return app.render("settings.html")
 
 
 @app.get("/logout")
