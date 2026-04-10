@@ -36,8 +36,11 @@
                 <div class="profile-card">
                     <div class="card-title">
                         {{ profile.name or profile.username }}
-                        {% if profile.major %} - {{ profile.major }}{% endif %}
-                        {% if profile.height %} - {{ profile.height }}{% endif %}
+                        {% if profile.pronouns %} · {{ profile.pronouns }}{% endif %}
+                        {% if profile.age %}, {{ profile.age }}{% endif %}
+                        {% if profile.year %} · {{ profile.year }}{% endif %}
+                        {% if profile.major %} · {{ profile.major }}{% endif %}
+                        {% if profile.height %} · {{ profile.height }}{% endif %}
                     </div>
 
                     {% if profile.photo_path %}

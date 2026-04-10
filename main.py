@@ -33,7 +33,7 @@ def _parse_form(req):
 def _get_user(user_id):
     with get_conn() as conn:
         row = conn.execute(
-            "SELECT username, name, major, height, age, about, photo_path FROM users WHERE id = ?",
+            "SELECT username, name, major, height, age, year, pronouns, about, photo_path FROM users WHERE id = ?",
             (user_id,),
         ).fetchone()
     return dict(row) if row else {}
@@ -98,6 +98,8 @@ def profile_post(req):
     name     = forms.get("name", "").strip()
     major    = forms.get("major", "").strip()
     height   = forms.get("height", "").strip()
+    year     = forms.get("year", "").strip()
+    pronouns = forms.get("pronouns", "").strip()
     about    = forms.get("about", "").strip()
     age      = forms.get("age", "").strip()
 
@@ -119,13 +121,13 @@ def profile_post(req):
     with get_conn() as conn:
         if photo_path:
             conn.execute(
-                "UPDATE users SET username=?, name=?, major=?, height=?, age=?, about=?, photo_path=? WHERE id=?",
-                (username, name, major, height, int(age), about, photo_path, user_id),
+                "UPDATE users SET username=?, name=?, major=?, height=?, age=?, year=?, pronouns=?, about=?, photo_path=? WHERE id=?",
+                (username, name, major, height, int(age), year, pronouns, about, photo_path, user_id),
             )
         else:
             conn.execute(
-                "UPDATE users SET username=?, name=?, major=?, height=?, age=?, about=? WHERE id=?",
-                (username, name, major, height, int(age), about, user_id),
+                "UPDATE users SET username=?, name=?, major=?, height=?, age=?, year=?, pronouns=?, about=? WHERE id=?",
+                (username, name, major, height, int(age), year, pronouns, about, user_id),
             )
 
     return app.render("profile.html", user=_get_user(user_id), error=None, success=True)
@@ -190,6 +192,23 @@ def discover_post(req):
             record_swipe(user_id, swiped_id, "left")
     dest = "/discover?toast=" + _url_quote(toast, safe="") if toast else "/discover"
     return redirect(dest)
+
+
+@app.get("/testimonials")
+def testimonials_get(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    with get_conn() as conn:
+        rows = conn.execute(
+            """
+            SELECT t.body, u.name, u.username, u.photo_path
+            FROM testimonials t
+            JOIN users u ON u.id = t.user_id
+            ORDER BY t.created_at DESC
+            """
+        ).fetchall()
+    return app.render("testimonials.html", testimonials=[dict(r) for r in rows])
 
 
 @app.get("/logout")

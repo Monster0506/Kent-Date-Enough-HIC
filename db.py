@@ -23,6 +23,8 @@ def init_db() -> None:
                 major         TEXT,
                 height        TEXT,
                 age           INTEGER,
+                year          TEXT,
+                pronouns      TEXT,
                 about         TEXT,
                 photo_path    TEXT,
                 created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -71,7 +73,7 @@ def get_next_profile(user_id: int) -> dict | None:
     with get_conn() as conn:
         row = conn.execute(
             """
-            SELECT id, username, name, major, height, about, photo_path
+            SELECT id, username, name, major, height, age, year, pronouns, about, photo_path
             FROM users
             WHERE id != ?
               AND id NOT IN (

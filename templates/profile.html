@@ -37,8 +37,15 @@
                 <div class="profile-right">
                     <div class="profile-fields">
                         <input type="text" name="name" placeholder="Name" value="{{ user.name or '' }}" required>
+                        <input type="text" name="pronouns" placeholder="Pronouns (e.g. she/her)" value="{{ user.pronouns or '' }}">
                         <input type="text" name="major" placeholder="Major" value="{{ user.major or '' }}">
-                        <input type="text" name="height" placeholder="Height" value="{{ user.height or '' }}">
+                        <select name="year" class="profile-select">
+                            <option value="" disabled {% if not user.year %}selected{% endif %}>Year</option>
+                            {% for opt in ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Grad Student'] %}
+                            <option value="{{ opt }}" {% if user.year == opt %}selected{% endif %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="text" name="height" placeholder="Height (e.g. 5'10&quot;)" value="{{ user.height or '' }}">
                         <input type="number" name="age" placeholder="Age" value="{{ user.age or '' }}" min="18" required>
                     </div>
 
