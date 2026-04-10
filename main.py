@@ -130,7 +130,6 @@ def profile_post(req):
 
     return app.render("profile.html", user=_get_user(user_id), error=None, success=True)
 
-
 @app.get("/login")
 def login_get(req):
     return app.render("login.html", error=None)
@@ -190,6 +189,10 @@ def discover_post(req):
             record_swipe(user_id, swiped_id, "left")
     dest = "/discover?toast=" + _url_quote(toast, safe="") if toast else "/discover"
     return redirect(dest)
+
+@app.get("/settings")
+def settings_get(req):
+    return app.render("settings.html")
 
 
 @app.get("/logout")
