@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-
+{% with active_nav = 'settings' %}{% include '_nav.html' %}{% endwith %}
 <div class="card-wrapper">
     <div class="settings-card left-card">
         <div class="card-content">
