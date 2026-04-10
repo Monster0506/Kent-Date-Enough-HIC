@@ -5,9 +5,7 @@
 
 {% block head %}
 <link rel="stylesheet" href="/static/css/discover.css">
-<link rel="stylesheet" href="/static/css/auth.css">
 <link rel="stylesheet" href="/static/css/profile.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 {% endblock %}
 
 {% block layout %}
@@ -19,54 +17,58 @@
         {% include '_bolt_bg.html' %}
 
         <div class="discover-center">
-            <div class="auth-card profile-card">
-                <h1 class="auth-title">My Profile</h1>
+            <form class="profile-panel" method="post" action="/profile" enctype="multipart/form-data">
 
-                {% if user.photo_path %}
-                    <div class="profile-photo-preview">
-                        <img src="/static/{{ user.photo_path }}" alt="Profile photo">
-                    </div>
-                {% endif %}
+                <div class="profile-left">
+                    <label class="profile-photo-wrap">
+                        {% if user.photo_path %}
+                            <img src="/static/{{ user.photo_path }}" alt="Profile photo" id="photo-preview" class="profile-photo-img">
+                        {% else %}
+                            <div class="profile-photo-placeholder" id="photo-placeholder">
+                                <i class="fa fa-user"></i>
+                            </div>
+                            <img src="" alt="" id="photo-preview" class="profile-photo-img" style="display:none">
+                        {% endif %}
+                        <input type="file" name="photo" accept="image/*" id="photo-input">
+                    </label>
+                    <textarea name="about" placeholder="Traits (comma separated)" class="profile-about">{{ user.about or '' }}</textarea>
+                </div>
 
-                {% if success %}
-                <p class="auth-success">Profile updated!</p>
-                {% endif %}
-
-                <form method="post" action="/profile" enctype="multipart/form-data">
-                    <div class="field">
-                        <input type="text" name="username" placeholder="Username" value="{{ user.username or '' }}">
-                    </div>
-                    <div class="field">
-                        <input type="text" name="name" placeholder="Full Name" value="{{ user.name or '' }}" required>
-                    </div>
-                    <div class="field">
+                <div class="profile-right">
+                    <div class="profile-fields">
+                        <input type="text" name="name" placeholder="Name" value="{{ user.name or '' }}" required>
                         <input type="text" name="major" placeholder="Major" value="{{ user.major or '' }}">
-                    </div>
-                    <div class="field">
-                        <input type="text" name="height" placeholder="Height (e.g. 5'10&quot;)" value="{{ user.height or '' }}">
-                    </div>
-                    <div class="field">
+                        <input type="text" name="height" placeholder="Height" value="{{ user.height or '' }}">
                         <input type="number" name="age" placeholder="Age" value="{{ user.age or '' }}" min="18" required>
                     </div>
-                    <div class="field">
-                        <textarea name="about" placeholder="About you (seperated by commas)" rows="3" class="profile-about">{{ user.about or '' }}</textarea>
-                    </div>
 
-                    <div class="field">
-                        <input type="file" name="photo" accept="image/*">
-                    </div>
+                    {% if success %}<p class="profile-success">Profile updated!</p>{% endif %}
+                    {% if error %}<p class="profile-error">{{ error }}</p>{% endif %}
 
-                    {% if error %}
-                    <p class="auth-error">{{ error }}</p>
-                    {% endif %}
+                    <input type="hidden" name="username" value="{{ user.username or '' }}">
 
-                    <button type="submit" class="btn btn-primary auth-submit">Save &#x2197;</button>
-                </form>
+                    <button type="submit" class="profile-save">Save &#x2197;</button>
+                </div>
 
-                <p class="auth-footer"><a href="/discover">Back to Discover</a></p>
-            </div>
+            </form>
         </div>
     </main>
 
 </div>
+
+<script>
+document.getElementById('photo-input').addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const preview = document.getElementById('photo-preview');
+        const placeholder = document.getElementById('photo-placeholder');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+});
+</script>
 {% endblock %}

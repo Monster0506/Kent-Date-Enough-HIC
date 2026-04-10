@@ -165,6 +165,9 @@ def discover_get(req):
     user_id = get_session(req)
     if not user_id:
         return redirect("/login")
+    me = _get_user(user_id)
+    if not me.get("name") or not me.get("age"):
+        return redirect("/profile")
     profile = get_next_profile(user_id)
     toast   = req.query("toast") or ""
     return app.render("discover.html", profile=profile, toast=toast)
