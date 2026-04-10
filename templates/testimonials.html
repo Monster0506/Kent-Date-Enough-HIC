@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Testimonials — Kent Date Enough{% endblock %}
+{% block body_class %}discover{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/discover.css">
+<link rel="stylesheet" href="/static/css/testimonials.css">
+{% endblock %}
+
+{% block layout %}
+<div class="discover-shell">
+
+    {% with active_nav = 'testimonials' %}{% include '_nav.html' %}{% endwith %}
+
+    <main class="discover-main">
+        {% include '_bolt_bg.html' %}
+
+        <div class="discover-center">
+            <div class="testimonials-panel">
+                <h1 class="testimonials-title">What people are saying</h1>
+                <div class="testimonials-grid">
+                    {% for t in testimonials %}
+                    <div class="testimonial-card">
+                        <div class="testimonial-avatar">
+                            {% if t.photo_path %}
+                                <img src="/static/{{ t.photo_path }}" alt="{{ t.name or t.username }}">
+                            {% else %}
+                                <div class="testimonial-avatar-placeholder">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="testimonial-body">
+                            <p class="testimonial-text">"{{ t.body }}"</p>
+                            <p class="testimonial-name">— {{ t.name or t.username }}</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="testimonials-empty">No testimonials yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+</div>
+{% endblock %}

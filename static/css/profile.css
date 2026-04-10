@@ -93,6 +93,28 @@
     outline: none;
 }
 
+.profile-select {
+    width: 100%;
+    padding: 1.2rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 1.1rem;
+    color: var(--black);
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+}
+
+.profile-select:focus {
+    box-shadow: 0 0 0 2px var(--dark-blue);
+}
+
+.profile-select option[value=""][disabled] {
+    color: var(--light-gray);
+}
+
 .profile-fields input::placeholder {
     color: var(--light-gray);
 }
