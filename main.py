@@ -192,7 +192,12 @@ def discover_post(req):
 
 @app.get("/settings")
 def settings_get(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
     return app.render("settings.html")
+
+@app.post("/settings")
 
 
 @app.get("/logout")
