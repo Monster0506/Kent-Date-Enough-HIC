@@ -2,7 +2,7 @@ import os
 import uuid
 from multipart import parse_form_data
 
-from db import get_conn, get_next_profile, hash_password, init_db, record_swipe, verify_password
+from db import get_conn, get_matches, get_messages, get_next_profile, hash_password, init_db, record_swipe, send_message, verify_password
 from kindling import Application
 from kindling.reactive import on, signal
 from urllib.parse import quote as _url_quote
@@ -191,6 +191,30 @@ def discover_post(req):
             record_swipe(user_id, swiped_id, "left")
     dest = "/discover?toast=" + _url_quote(toast, safe="") if toast else "/discover"
     return redirect(dest)
+
+
+@app.get("/chats")
+def chats_get(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    matches = get_matches(user_id)
+    match_id = int(req.query("match") or 0)
+    active = next((m for m in matches if m["id"] == match_id), matches[0] if matches else None)
+    messages = get_messages(active["id"]) if active else []
+    return app.render("chats.html", matches=matches, active=active, messages=messages, user_id=user_id)
+
+
+@app.post("/chats")
+def chats_post(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    match_id = int(req.form_value("match_id") or 0)
+    body = (req.form_value("body") or "").strip()
+    if match_id and body:
+        send_message(match_id, user_id, body)
+    return redirect(f"/chats?match={match_id}")
 
 
 @app.get("/testimonials")
