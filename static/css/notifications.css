@@ -12,12 +12,6 @@
     padding: 1.75rem 2rem;
 }
 
-.notif-title {
-    font-family: 'Jura', sans-serif;
-    font-size: clamp(2rem, 5vw, 3rem);
-    font-weight: 700;
-    color: var(--dark-blue);
-}
 
 .notif-list {
     display: flex;

@@ -116,3 +116,20 @@ body.landing {
     color: var(--light-yellow);
     border-color: var(--light-yellow);
 }
+
+.page-bolt-title {
+    font-family: 'Jura', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    color: var(--white);
+    text-shadow: 0 1px 6px rgba(2, 54, 114, 0.7), 0 2px 14px rgba(2, 54, 114, 0.4);
+    margin: 0;
+}
+
+.card-page-title {
+    font-family: 'Jura', sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    color: var(--dark-blue);
+    margin: 0 0 1rem;
+}
