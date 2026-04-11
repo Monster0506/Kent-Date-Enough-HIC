@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications — Kent Date Enough{% endblock %}
+{% block body_class %}discover{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/discover.css">
+<link rel="stylesheet" href="/static/css/notifications.css">
+{% endblock %}
+
+{% block layout %}
+<div class="discover-shell">
+
+    {% with active_nav = 'notifications' %}{% include '_nav.html' %}{% endwith %}
+
+    <main class="discover-main">
+        {% include '_bolt_bg.html' %}
+
+        <div class="notif-page">
+            <h1 class="notif-title">Notifications</h1>
+
+            <div class="notif-list">
+                {% for n in notifs %}
+
+                {% if n.type == 'match' %}
+                <div class="notif-card">
+                    <i class="fa-solid fa-circle-info notif-icon"></i>
+                    <div class="notif-body">
+                        <p class="notif-heading">You have a new match</p>
+                        <p class="notif-desc">You matched with {{ n.name }}. Start a conversation!</p>
+                        <div class="notif-actions">
+                            <a href="/chats?match={{ n.match_id }}" class="notif-btn">Chat</a>
+                            <form method="post" action="/notifications/dismiss">
+                                <input type="hidden" name="match_id" value="{{ n.match_id }}">
+                                <button type="submit" class="notif-dismiss">Dismiss</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {% elif n.type == 'message' %}
+                <div class="notif-card">
+                    <i class="fa-solid fa-circle-info notif-icon"></i>
+                    <div class="notif-body">
+                        <p class="notif-heading">You have a new message</p>
+                        <p class="notif-desc">You have {{ n.count }} unread message{{ 's' if n.count != 1 else '' }}. Click "Chat" to continue the conversation.</p>
+                        <a href="/chats" class="notif-btn">Chat</a>
+                    </div>
+                </div>
+
+                {% elif n.type == 'profile' %}
+                <div class="notif-card">
+                    <i class="fa-solid fa-circle-info notif-icon"></i>
+                    <div class="notif-body">
+                        <p class="notif-heading">Update Profile</p>
+                        <p class="notif-desc">Complete your profile to get more matches. Make sure your profile has the most up to date information.</p>
+                        <a href="/profile" class="notif-btn">Update Profile</a>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <p class="notif-empty">You're all caught up!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </main>
+
+</div>
+{% endblock %}

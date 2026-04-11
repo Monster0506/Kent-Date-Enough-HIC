@@ -2,7 +2,7 @@ import os
 import uuid
 from multipart import parse_form_data
 
-from db import get_conn, get_matches, get_messages, get_next_profile, hash_password, init_db, record_swipe, send_message, verify_password
+from db import dismiss_match_notification, get_conn, get_matches, get_messages, get_next_profile, get_notifications, hash_password, init_db, mark_messages_read, record_swipe, send_message, verify_password
 from kindling import Application
 from kindling.reactive import on, signal
 from urllib.parse import quote as _url_quote
@@ -12,7 +12,7 @@ from session import clear_session_header, get_session, set_session_header
 init_db()
 
 app = Application(template_dir="templates")
-app.config.max_request_body_bytes = 10 * 1024 * 1024  # 10 MB
+app.config.max_request_body_bytes = 10 * 1024 * 1024
 app.static("/static", "static")
 
 PROFILE_IMAGES_DIR = os.path.join("static", "profile_images")
@@ -28,6 +28,10 @@ def _parse_form(req):
         "REQUEST_METHOD": "POST",
     }
     return parse_form_data(environ)
+
+
+def _nc(user_id):
+    return len(get_notifications(user_id))
 
 
 def _get_user(user_id):
@@ -83,7 +87,7 @@ def profile_get(req):
     user_id = get_session(req)
     if not user_id:
         return redirect("/login")
-    return app.render("profile.html", user=_get_user(user_id), error=None, success=False)
+    return app.render("profile.html", user=_get_user(user_id), error=None, success=False, notif_count=_nc(user_id))
 
 
 @app.post("/profile")
@@ -104,9 +108,9 @@ def profile_post(req):
     age      = forms.get("age", "").strip()
 
     if not name or not age:
-        return app.render("profile.html", user=_get_user(user_id), error="Name and age are required.", success=False)
+        return app.render("profile.html", user=_get_user(user_id), error="Name and age are required.", success=False, notif_count=_nc(user_id))
     if not age.isdigit() or int(age) < 18:
-        return app.render("profile.html", user=_get_user(user_id), error="You must be at least 18 years old.", success=False)
+        return app.render("profile.html", user=_get_user(user_id), error="You must be at least 18 years old.", success=False, notif_count=_nc(user_id))
 
     photo_path = None
     photo_file = files.get("photo")
@@ -130,7 +134,7 @@ def profile_post(req):
                 (username, name, major, height, int(age), year, pronouns, about, user_id),
             )
 
-    return app.render("profile.html", user=_get_user(user_id), error=None, success=True)
+    return app.render("profile.html", user=_get_user(user_id), error=None, success=True, notif_count=_nc(user_id))
 
 @app.get("/login")
 def login_get(req):
@@ -171,7 +175,7 @@ def discover_get(req):
         return redirect("/profile")
     profile = get_next_profile(user_id)
     toast   = req.query("toast") or ""
-    return app.render("discover.html", profile=profile, toast=toast)
+    return app.render("discover.html", profile=profile, toast=toast, notif_count=_nc(user_id))
 
 
 @app.post("/discover")
@@ -202,7 +206,9 @@ def chats_get(req):
     match_id = int(req.query("match") or 0)
     active = next((m for m in matches if m["id"] == match_id), matches[0] if matches else None)
     messages = get_messages(active["id"]) if active else []
-    return app.render("chats.html", matches=matches, active=active, messages=messages, user_id=user_id)
+    if active:
+        mark_messages_read(user_id, active["id"])
+    return app.render("chats.html", matches=matches, active=active, messages=messages, user_id=user_id, notif_count=_nc(user_id))
 
 
 @app.post("/chats")
@@ -231,7 +237,7 @@ def testimonials_get(req):
             ORDER BY t.created_at DESC
             """
         ).fetchall()
-    return app.render("testimonials.html", testimonials=[dict(r) for r in rows])
+    return app.render("testimonials.html", testimonials=[dict(r) for r in rows], notif_count=_nc(user_id))
 
 
 @app.get("/settings")
@@ -239,7 +245,27 @@ def settings_get(req):
     user_id = get_session(req)
     if not user_id:
         return redirect("/login")
-    return app.render("settings.html")
+    return app.render("settings.html", notif_count=_nc(user_id))
+
+
+@app.get("/notifications")
+def notifications_get(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    notifs = get_notifications(user_id)
+    return app.render("notifications.html", notifs=notifs, notif_count=len(notifs))
+
+
+@app.post("/notifications/dismiss")
+def notifications_dismiss(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    match_id = int(req.form_value("match_id") or 0)
+    if match_id:
+        dismiss_match_notification(user_id, match_id)
+    return redirect("/notifications")
 
 
 @app.get("/logout")

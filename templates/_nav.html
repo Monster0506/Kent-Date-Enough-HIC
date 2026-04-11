@@ -1,5 +1,6 @@
 <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
     <i class="fa-solid fa-bars"></i>
+    {% if notif_count %}<span class="nav-badge">{{ notif_count }}</span>{% endif %}
 </button>
 
 <div class="nav-overlay" id="nav-overlay"></div>
@@ -15,6 +16,10 @@
     </a>
     <a href="/chats" class="sidebar-item {% if active_nav == 'chats' %}sidebar-active{% endif %}">
         <i class="fa-solid fa-message sidebar-icon"></i> Chats
+    </a>
+    <a href="/notifications" class="sidebar-item {% if active_nav == 'notifications' %}sidebar-active{% endif %}">
+        <i class="fa-solid fa-bell sidebar-icon"></i> Notifications
+        {% if notif_count %}<span class="sidebar-badge">{{ notif_count }}</span>{% endif %}
     </a>
     <a href="/testimonials" class="sidebar-item {% if active_nav == 'testimonials' %}sidebar-active{% endif %}">
         <i class="fa-solid fa-star sidebar-icon"></i> Testimonials
