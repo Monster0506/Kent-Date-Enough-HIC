@@ -41,8 +41,8 @@
                         {% if profile.pronouns %} · {{ profile.pronouns }}{% endif %}
                         {% if profile.age %}, {{ profile.age }}{% endif %}
                         {% if profile.year %} · {{ profile.year }}{% endif %}
-                        {% if profile.major %} · {{ profile.major }}{% endif %}
-                        {% if profile.height %} · {{ profile.height }}{% endif %}
+                         · <span {% if not profile.major %}class="card-field-empty"{% endif %}>{{ profile.major or "Major not listed" }}</span>
+                         · <span {% if not profile.height %}class="card-field-empty"{% endif %}>{{ profile.height or "Height not listed" }}</span>
                     </div>
 
                     {% if profile.photo_path %}
@@ -53,9 +53,9 @@
                     </div>
                     {% endif %}
 
-                    {% if profile.about %}
-                    {% set traits = profile.about.split(',') | map('trim') | select | list %}
+                    {% set traits = profile.about.split(',') | map('trim') | select | list if profile.about else [] %}
                     <div class="card-traits">
+                        {% if traits %}
                         {% set half = ((traits | length) / 2) | round(0, 'ceil') | int %}
                         <div class="traits-col">
                             {% for t in traits[:half] %}<span>{{ t }}</span>{% endfor %}
@@ -63,8 +63,10 @@
                         <div class="traits-col">
                             {% for t in traits[half:] %}<span>{{ t }}</span>{% endfor %}
                         </div>
+                        {% else %}
+                        <span class="card-field-empty">No traits listed</span>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
 
                 <form id="discover-accept" method="post" action="/discover" class="side-panel accept-panel">
