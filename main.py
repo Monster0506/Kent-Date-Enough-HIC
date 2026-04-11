@@ -2,7 +2,7 @@ import os
 import uuid
 from multipart import parse_form_data
 
-from db import dismiss_match_notification, get_conn, get_matches, get_messages, get_next_profile, get_notifications, hash_password, init_db, mark_messages_read, record_swipe, send_message, verify_password
+from db import dismiss_match_notification, get_conn, get_matches, get_messages, get_next_profile, get_notifications, hash_password, init_db, mark_messages_read, record_swipe, send_message, verify_password, update_user_settings, get_user_settings
 from kindling import Application
 from kindling.reactive import on, signal
 from urllib.parse import quote as _url_quote
@@ -266,6 +266,27 @@ def notifications_dismiss(req):
     if match_id:
         dismiss_match_notification(user_id, match_id)
     return redirect("/notifications")
+    settings = get_user_settings(user_id)
+    return app.render("settings.html", settings=settings)
+    
+
+
+@app.post("/settings")
+def settings_post(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    
+    #defaults to 0 since unselected check is not passed
+    match_all_majors = 1 if req.form.get("majorsMatchSelection") == "all" else 0
+    match_men    = 1 if req.form.get("genderSelectMen")   else 0
+    match_women  = 1 if req.form.get("genderSelectWomen") else 0
+    match_nb     = 1 if req.form.get("genderSelectNB")    else 0
+    match_other  = 1 if req.form.get("genderSelectOther") else 0
+
+    update_user_settings(user_id, match_all_majors, match_men, match_women, match_nb, match_other)
+    return redirect("/settings")
+
 
 
 @app.get("/logout")
