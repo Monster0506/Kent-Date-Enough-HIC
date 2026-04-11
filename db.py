@@ -14,7 +14,8 @@ def get_conn() -> sqlite3.Connection:
 
 def init_db() -> None:
     with get_conn() as conn:
-        conn.executescript("""
+        conn.executescript(
+            """
             CREATE TABLE IF NOT EXISTS users (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
                 username      TEXT    NOT NULL UNIQUE,
@@ -72,7 +73,8 @@ def init_db() -> None:
                 user_id  INTEGER NOT NULL REFERENCES users(id),
                 match_id INTEGER NOT NULL REFERENCES matches(id),
                 PRIMARY KEY (user_id, match_id)
-                           
+            );
+            
             CREATE TABLE IF NOT EXISTS user_settings(
                 id                  INTEGER     PRIMARY KEY AUTOINCREMENT,
                 user_id             INTEGER     NOT NULL UNIQUE REFERENCES users(id),
