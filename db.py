@@ -74,7 +74,7 @@ def init_db() -> None:
                 match_id INTEGER NOT NULL REFERENCES matches(id),
                 PRIMARY KEY (user_id, match_id)
             );
-            
+
             CREATE TABLE IF NOT EXISTS user_settings(
                 id                  INTEGER     PRIMARY KEY AUTOINCREMENT,
                 user_id             INTEGER     NOT NULL UNIQUE REFERENCES users(id),

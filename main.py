@@ -79,6 +79,13 @@ with app.reactive("signup", path="/signup", template="signup.html") as _signup:
                 "INSERT INTO users (username, password_hash) VALUES (?, ?)",
                 (username, hash_password(password)),
             )
+            user_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+            print(user_id)
+            conn.execute(
+                "INSERT INTO user_settings(user_id) VALUES (?)",
+            (user_id,)
+            )
+
 
         _success.value = True
 
@@ -245,7 +252,8 @@ def settings_get(req):
     user_id = get_session(req)
     if not user_id:
         return redirect("/login")
-    return app.render("settings.html", notif_count=_nc(user_id))
+    settings = get_user_settings(user_id)
+    return app.render("settings.html", notif_count=_nc(user_id), settings=settings)
 
 
 @app.get("/notifications")
@@ -266,8 +274,6 @@ def notifications_dismiss(req):
     if match_id:
         dismiss_match_notification(user_id, match_id)
     return redirect("/notifications")
-    settings = get_user_settings(user_id)
-    return app.render("settings.html", settings=settings)
     
 
 
@@ -278,7 +284,7 @@ def settings_post(req):
         return redirect("/login")
     
     #defaults to 0 since unselected check is not passed
-    match_all_majors = 1 if req.form.get("majorsMatchSelection") == "all" else 0
+    match_all_majors = 1 if req.form.get("majorsMatchSelection") == ['all'] else 0
     match_men    = 1 if req.form.get("genderSelectMen")   else 0
     match_women  = 1 if req.form.get("genderSelectWomen") else 0
     match_nb     = 1 if req.form.get("genderSelectNB")    else 0
