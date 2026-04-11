@@ -37,7 +37,7 @@ def _nc(user_id):
 def _get_user(user_id):
     with get_conn() as conn:
         row = conn.execute(
-            "SELECT username, name, major, height, age, year, pronouns, about, photo_path FROM users WHERE id = ?",
+            "SELECT username, name, major, height, age, year, pronouns, about, photo_path, created_at FROM users WHERE id = ?",
             (user_id,),
         ).fetchone()
     return dict(row) if row else {}
@@ -253,7 +253,8 @@ def settings_get(req):
     if not user_id:
         return redirect("/login")
     settings = get_user_settings(user_id)
-    return app.render("settings.html", notif_count=_nc(user_id), settings=settings)
+    user = _get_user(user_id)
+    return app.render("settings.html", notif_count=_nc(user_id), settings=settings, user=user)
 
 
 @app.get("/notifications")
