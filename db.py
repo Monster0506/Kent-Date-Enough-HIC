@@ -94,17 +94,45 @@ def record_swipe(swiper_id: int, swiped_id: int, direction: str) -> bool:
             (swiper_id, swiped_id, direction),
         )
         if direction == "right":
-            mutual = conn.execute(
-                "SELECT 1 FROM swipes WHERE swiper_id = ? AND swiped_id = ? AND direction = 'right'",
-                (swiped_id, swiper_id),
-            ).fetchone()
-            if mutual:
-                conn.execute(
-                    "INSERT INTO matches (user_a_id, user_b_id) VALUES (?, ?)",
-                    (swiper_id, swiped_id),
-                )
-                return True
+            conn.execute(
+                "INSERT INTO matches (user_a_id, user_b_id) VALUES (?, ?)",
+                (swiper_id, swiped_id),
+            )
+            return True
     return False
+
+
+def get_matches(user_id: int) -> list[dict]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            """
+            SELECT m.id,
+                   u.name, u.username, u.photo_path
+            FROM matches m
+            JOIN users u ON u.id = CASE WHEN m.user_a_id = ? THEN m.user_b_id ELSE m.user_a_id END
+            WHERE m.user_a_id = ? OR m.user_b_id = ?
+            ORDER BY m.created_at DESC
+            """,
+            (user_id, user_id, user_id),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_messages(match_id: int) -> list[dict]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT sender_id, body, sent_at FROM messages WHERE match_id = ? ORDER BY sent_at ASC",
+            (match_id,),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def send_message(match_id: int, sender_id: int, body: str) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO messages (match_id, sender_id, body) VALUES (?, ?, ?)",
+            (match_id, sender_id, body),
+        )
 
 
 def verify_password(password: str, stored: str) -> bool:

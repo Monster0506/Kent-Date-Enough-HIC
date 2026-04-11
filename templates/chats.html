@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Chats — Kent Date Enough{% endblock %}
+{% block body_class %}discover{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/discover.css">
+<link rel="stylesheet" href="/static/css/chats.css">
+{% endblock %}
+
+{% block layout %}
+<div class="discover-shell">
+
+    {% with active_nav = 'chats' %}{% include '_nav.html' %}{% endwith %}
+
+    <main class="discover-main">
+        {% include '_bolt_bg.html' %}
+
+        <div class="discover-center">
+            <div class="chats-panel">
+
+                <div class="chats-sidebar">
+                    {% for m in matches %}
+                    <a href="/chats?match={{ m.id }}"
+                       class="chat-row {% if active and active.id == m.id %}chat-row-active{% endif %}">
+                        <div class="chat-row-avatar">
+                            {% if m.photo_path %}
+                                <img src="/static/{{ m.photo_path }}" alt="{{ m.name or m.username }}">
+                            {% else %}
+                                <div class="chat-row-avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+                            {% endif %}
+                        </div>
+                        <span class="chat-row-name">{{ m.name or m.username }}</span>
+                    </a>
+                    {% else %}
+                    <p class="chats-empty">No matches yet.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="chats-convo">
+                    {% if active %}
+                    <div class="chats-convo-header">{{ active.name or active.username }}</div>
+
+                    <div class="chats-messages" id="messages">
+                        {% for msg in messages %}
+                        <div class="bubble-wrap {% if msg.sender_id == user_id %}bubble-mine{% else %}bubble-theirs{% endif %}">
+                            <div class="bubble">{{ msg.body }}</div>
+                        </div>
+                        {% else %}
+                        <p class="chats-no-messages">Say hello!</p>
+                        {% endfor %}
+                    </div>
+
+                    <form class="chats-input-row" method="post" action="/chats">
+                        <input type="hidden" name="match_id" value="{{ active.id }}">
+                        <input type="text" name="body" placeholder="Message…" autocomplete="off" autofocus>
+                        <button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
+                    {% else %}
+                    <div class="chats-no-match">Select a match to start chatting.</div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+</div>
+
+<script>
+var el = document.getElementById('messages');
+if (el) el.scrollTop = el.scrollHeight;
+</script>
+{% endblock %}
