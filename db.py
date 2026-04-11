@@ -60,6 +60,19 @@ def init_db() -> None:
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 UNIQUE(swiper_id, swiped_id)
             );
+
+            CREATE TABLE IF NOT EXISTS message_reads (
+                user_id      INTEGER NOT NULL REFERENCES users(id),
+                match_id     INTEGER NOT NULL REFERENCES matches(id),
+                last_read_id INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (user_id, match_id)
+            );
+
+            CREATE TABLE IF NOT EXISTS dismissed_matches (
+                user_id  INTEGER NOT NULL REFERENCES users(id),
+                match_id INTEGER NOT NULL REFERENCES matches(id),
+                PRIMARY KEY (user_id, match_id)
+            );
         """)
 
 
@@ -94,11 +107,16 @@ def record_swipe(swiper_id: int, swiped_id: int, direction: str) -> bool:
             (swiper_id, swiped_id, direction),
         )
         if direction == "right":
-            conn.execute(
-                "INSERT INTO matches (user_a_id, user_b_id) VALUES (?, ?)",
-                (swiper_id, swiped_id),
-            )
-            return True
+            mutual = conn.execute(
+                "SELECT 1 FROM swipes WHERE swiper_id = ? AND swiped_id = ? AND direction = 'right'",
+                (swiped_id, swiper_id),
+            ).fetchone()
+            if mutual:
+                conn.execute(
+                    "INSERT INTO matches (user_a_id, user_b_id) VALUES (?, ?)",
+                    (swiper_id, swiped_id),
+                )
+                return True
     return False
 
 
@@ -133,6 +151,64 @@ def send_message(match_id: int, sender_id: int, body: str) -> None:
             "INSERT INTO messages (match_id, sender_id, body) VALUES (?, ?, ?)",
             (match_id, sender_id, body),
         )
+
+
+def mark_messages_read(user_id: int, match_id: int) -> None:
+    with get_conn() as conn:
+        last = conn.execute(
+            "SELECT MAX(id) FROM messages WHERE match_id = ?", (match_id,)
+        ).fetchone()[0]
+        if last:
+            conn.execute(
+                """INSERT INTO message_reads (user_id, match_id, last_read_id)
+                   VALUES (?, ?, ?)
+                   ON CONFLICT(user_id, match_id) DO UPDATE SET last_read_id = excluded.last_read_id""",
+                (user_id, match_id, last),
+            )
+
+
+def dismiss_match_notification(user_id: int, match_id: int) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO dismissed_matches (user_id, match_id) VALUES (?, ?)",
+            (user_id, match_id),
+        )
+
+
+def get_notifications(user_id: int) -> list[dict]:
+    notifs = []
+    with get_conn() as conn:
+        matches = conn.execute(
+            """SELECT m.id, u.name, u.username
+               FROM matches m
+               JOIN users u ON u.id = CASE WHEN m.user_a_id = ? THEN m.user_b_id ELSE m.user_a_id END
+               WHERE (m.user_a_id = ? OR m.user_b_id = ?)
+                 AND m.id NOT IN (
+                     SELECT match_id FROM dismissed_matches WHERE user_id = ?
+                 )
+               ORDER BY m.created_at DESC""",
+            (user_id, user_id, user_id, user_id),
+        ).fetchall()
+        for m in matches:
+            notifs.append({"type": "match", "match_id": m["id"], "name": m["name"] or m["username"]})
+
+        msg_count = conn.execute(
+            """SELECT COUNT(*) FROM messages msg
+               JOIN matches m ON m.id = msg.match_id
+               LEFT JOIN message_reads mr ON mr.user_id = ? AND mr.match_id = msg.match_id
+               WHERE (m.user_a_id = ? OR m.user_b_id = ?)
+                 AND msg.sender_id != ?
+                 AND msg.id > COALESCE(mr.last_read_id, 0)""",
+            (user_id, user_id, user_id, user_id),
+        ).fetchone()[0]
+        if msg_count:
+            notifs.append({"type": "message", "count": msg_count})
+
+        row = conn.execute("SELECT name, age, photo_path FROM users WHERE id = ?", (user_id,)).fetchone()
+        if not row["name"] or not row["age"] or not row["photo_path"]:
+            notifs.append({"type": "profile"})
+
+    return notifs
 
 
 def verify_password(password: str, stored: str) -> bool:
