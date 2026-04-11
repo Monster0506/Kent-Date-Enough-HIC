@@ -16,29 +16,29 @@
             <h2>Majors</h2>
             <form class="pref-form" name="matchSettings" method="POST" action="/settings">
                 <select id="majorsMatch" name="majorsMatchSelection">
-                    <option value="all">All Majors</option>
-                    <option value="same">Same Major</option>
+                    <option value="all" {% if settings.match_all_majors %}selected{% endif %}>All Majors</option>
+                    <option value="same" {% if not settings.match_all_majors %}selected{% endif %}>Same Major</option>
                 </select>
 
             <h2>Genders</h2>
                 <div>
-                    <input type="checkbox" id="genderSelectMen" name="genderSelectMen" value="Men">
+                    <input type="checkbox" id="genderSelectMen" name="genderSelectMen" value="Men" {% if settings.match_men %}checked{% endif %}>
                     <label for="genderSelectMen">Men</label>
                 </div>
 
                 <div>
-                    <input type="checkbox" id="genderSelectWomen" name="genderSelectWomen" value="Women">
-                    <label for="genderSelectMen">Women</label>
+                    <input type="checkbox" id="genderSelectWomen" name="genderSelectWomen" value="Women" {% if settings.match_women %}checked{% endif %}>
+                    <label for="genderSelectWomen">Women</label>
                 </div>
 
                 <div>
-                    <input type="checkbox" id="genderSelectNB" name="genderSelectNB" value="NB">
-                    <label for="genderSelectMen">Nonbinary</label>
+                    <input type="checkbox" id="genderSelectNB" name="genderSelectNB" value="NB" {% if settings.match_nb %}checked{% endif %}>
+                    <label for="genderSelectNB">Nonbinary</label>
                 </div>
 
                 <div>
-                    <input type="checkbox" id="genderSelectOther" name="genderSelectOther" value="Other">
-                    <label for="genderSelectMen">Other</label>
+                    <input type="checkbox" id="genderSelectOther" name="genderSelectOther" value="Other" {% if settings.match_other %}checked{% endif %}>
+                    <label for="genderSelectOther">Other</label>
                 </div>
 
                 <input class="btn btn-submit" type="submit" value="Submit">

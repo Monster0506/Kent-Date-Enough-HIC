@@ -72,6 +72,15 @@ def init_db() -> None:
                 user_id  INTEGER NOT NULL REFERENCES users(id),
                 match_id INTEGER NOT NULL REFERENCES matches(id),
                 PRIMARY KEY (user_id, match_id)
+                           
+            CREATE TABLE IF NOT EXISTS user_settings(
+                id                  INTEGER     PRIMARY KEY AUTOINCREMENT,
+                user_id             INTEGER     NOT NULL UNIQUE REFERENCES users(id),
+                match_all_majors     INTEGER     DEFAULT 1,
+                match_men           INTEGER     DEFAULT 1,
+                match_women         INTEGER     DEFAULT 1,
+                match_nb            INTEGER     DEFAULT 1,
+                match_other         INTEGER     DEFAULT 1
             );
         """)
 
@@ -216,3 +225,36 @@ def verify_password(password: str, stored: str) -> bool:
     salt = bytes.fromhex(salt_hex)
     key = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 260_000)
     return key.hex() == key_hex
+
+def update_user_settings(userID:int ,majorSetting: int, matchMen: int, matchWomen: int, matchNB: int, matchOther: int):
+    with get_conn() as conn:
+        conn.execute(
+                    "INSERT INTO user_settings(user_id, match_all_majors, match_men, match_women, match_nb, match_other) "
+                    "VALUES (?, ?, ?, ?, ?, ?) "
+                    "ON CONFLICT(user_id) DO UPDATE SET "
+                    "match_all_majors=excluded.match_all_majors, "
+                    "match_men=excluded.match_men, "
+                    "match_women=excluded.match_women, "
+                    "match_nb=excluded.match_nb, "
+                    "match_other=excluded.match_other",
+                    (userID, majorSetting, matchMen, matchWomen, matchNB, matchOther)
+                )
+
+def get_user_settings(userID:int):
+    with get_conn() as conn:
+        settings = conn.execute(
+            """
+            SELECT match_all_majors, match_men, match_women, match_nb, match_other
+            FROM user_settings
+            WHERE user_id = ?
+            """, (userID,)
+        ).fetchone()
+    if not settings:
+        settings = {
+            "match_all_majors" : 1,
+            "match_men" : 1,
+            "match_women" : 1,
+            "match_nb" : 1,
+            "match_other" : 1
+        }
+    return dict(settings)
