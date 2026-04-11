@@ -167,6 +167,11 @@ body.discover .page-content {
     color: var(--gold);
 }
 
+.card-field-empty {
+    font-style: italic;
+    opacity: 0.5;
+}
+
 .no-profiles-msg {
     font-family: 'Jura', sans-serif;
     font-size: 1rem;
