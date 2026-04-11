@@ -173,12 +173,16 @@
 }
 
 .chats-input-row button {
-    width: 38px;
+    padding: 0 1rem;
     height: 38px;
-    border-radius: 50%;
+    border-radius: 20px;
     border: none;
     background: var(--dark-blue);
     color: var(--light-yellow);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    gap: 0.4rem;
     cursor: pointer;
     display: flex;
     align-items: center;
