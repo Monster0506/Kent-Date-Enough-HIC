@@ -254,6 +254,29 @@ def get_notifications(user_id: int) -> list[dict]:
     return notifs
 
 
+def get_user_testimonial(user_id: int) -> dict | None:
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT id, body FROM testimonials WHERE user_id = ?", (user_id,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def upsert_testimonial(user_id: int, body: str) -> None:
+    with get_conn() as conn:
+        existing = conn.execute(
+            "SELECT id FROM testimonials WHERE user_id = ?", (user_id,)
+        ).fetchone()
+        if existing:
+            conn.execute(
+                "UPDATE testimonials SET body = ? WHERE user_id = ?", (body, user_id)
+            )
+        else:
+            conn.execute(
+                "INSERT INTO testimonials (user_id, body) VALUES (?, ?)", (user_id, body)
+            )
+
+
 def verify_password(password: str, stored: str) -> bool:
     salt_hex, key_hex = stored.split(":", 1)
     salt = bytes.fromhex(salt_hex)

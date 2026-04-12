@@ -2,7 +2,7 @@ import os
 import uuid
 from multipart import parse_form_data
 
-from db import dismiss_match_notification, get_conn, get_matches, get_messages, get_next_profile, get_notifications, hash_password, init_db, mark_messages_read, record_swipe, send_message, verify_password, update_user_settings, get_user_settings
+from db import dismiss_match_notification, get_conn, get_matches, get_messages, get_next_profile, get_notifications, hash_password, init_db, mark_messages_read, record_swipe, send_message, verify_password, update_user_settings, get_user_settings, get_user_testimonial, upsert_testimonial
 from kindling import Application
 from kindling.reactive import on, signal
 from urllib.parse import quote as _url_quote
@@ -232,11 +232,7 @@ def chats_post(req):
     return redirect(f"/chats?match={match_id}")
 
 
-@app.get("/testimonials")
-def testimonials_get(req):
-    user_id = get_session(req)
-    if not user_id:
-        return redirect("/login")
+def _get_testimonials():
     with get_conn() as conn:
         rows = conn.execute(
             """
@@ -246,7 +242,44 @@ def testimonials_get(req):
             ORDER BY t.created_at DESC
             """
         ).fetchall()
-    return app.render("testimonials.html", testimonials=[dict(r) for r in rows], notif_count=_nc(user_id))
+    return [dict(r) for r in rows]
+
+
+@app.get("/testimonials")
+def testimonials_get(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    return app.render(
+        "testimonials.html",
+        testimonials=_get_testimonials(),
+        my_testimonial=get_user_testimonial(user_id),
+        error=None,
+        notif_count=_nc(user_id),
+    )
+
+
+@app.post("/testimonials")
+def testimonials_post(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    body = (req.form_value("body") or "").strip()
+    error = None
+    if not body:
+        error = "Testimonial cannot be empty."
+    elif len(body) > 300:
+        error = "Keep it under 300 characters."
+    else:
+        upsert_testimonial(user_id, body)
+        return redirect("/testimonials")
+    return app.render(
+        "testimonials.html",
+        testimonials=_get_testimonials(),
+        my_testimonial=get_user_testimonial(user_id),
+        error=error,
+        notif_count=_nc(user_id),
+    )
 
 
 @app.get("/settings")

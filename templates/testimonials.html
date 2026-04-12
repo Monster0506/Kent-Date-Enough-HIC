@@ -19,6 +19,23 @@
         <div class="discover-center">
             <div class="testimonials-panel">
                 <h1 class="testimonials-title card-page-title">What people are saying</h1>
+
+                <form class="testimonial-form" method="post" action="/testimonials">
+                    <textarea
+                        name="body"
+                        class="testimonial-input"
+                        maxlength="300"
+                        placeholder="Share your Kent Date Enough story…"
+                    >{{ my_testimonial.body if my_testimonial else '' }}</textarea>
+                    {% if error %}<p class="testimonial-form-error">{{ error }}</p>{% endif %}
+                    <div class="testimonial-form-footer">
+                        <span class="testimonial-char-count"><span id="tcount">0</span>/300</span>
+                        <button type="submit" class="btn btn-submit">
+                            {{ 'Update' if my_testimonial else 'Share' }} &#x2197;
+                        </button>
+                    </div>
+                </form>
+
                 <div class="testimonials-grid">
                     {% for t in testimonials %}
                     <div class="testimonial-card">
@@ -45,4 +62,14 @@
     </main>
 
 </div>
+
+<script>
+(function () {
+    var ta = document.querySelector('.testimonial-input');
+    var counter = document.getElementById('tcount');
+    function update() { counter.textContent = ta.value.length; }
+    ta.addEventListener('input', update);
+    update();
+})();
+</script>
 {% endblock %}
