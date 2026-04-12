@@ -26,10 +26,13 @@ def init_db() -> None:
                 age           INTEGER,
                 year          TEXT,
                 pronouns      TEXT,
+                gender        TEXT,
                 about         TEXT,
                 photo_path    TEXT,
                 created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
             );
+
+
 
             CREATE TABLE IF NOT EXISTS matches (
                 id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -85,6 +88,9 @@ def init_db() -> None:
                 match_other         INTEGER     DEFAULT 1
             );
         """)
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(users)").fetchall()]
+        if "gender" not in cols:
+            conn.execute("ALTER TABLE users ADD COLUMN gender TEXT")
 
 
 def hash_password(password: str) -> str:
@@ -93,20 +99,46 @@ def hash_password(password: str) -> str:
     return salt.hex() + ":" + key.hex()
 
 
-def get_next_profile(user_id: int) -> dict | None:
+def get_next_profile(user_id: int, settings: dict | None = None) -> dict | None:
     with get_conn() as conn:
+        me = conn.execute("SELECT major FROM users WHERE id = ?", (user_id,)).fetchone()
+        my_major = me["major"] if me else None
+
+        clauses = [
+            "id != ?",
+            "id NOT IN (SELECT swiped_id FROM swipes WHERE swiper_id = ?)",
+        ]
+        params: list = [user_id, user_id]
+
+        if settings:
+            if not settings.get("match_all_majors", 1) and my_major:
+                clauses.append("major = ?")
+                params.append(my_major)
+
+            gender_map = {
+                "Men":       settings.get("match_men", 1),
+                "Women":     settings.get("match_women", 1),
+                "Nonbinary": settings.get("match_nb", 1),
+                "Other":     settings.get("match_other", 1),
+            }
+            allowed = [g for g, v in gender_map.items() if v]
+            if allowed and len(allowed) < 4:
+                placeholders = ",".join("?" * len(allowed))
+                clauses.append(
+                    f"(gender IN ({placeholders}) OR gender IS NULL OR gender = '')"
+                )
+                params.extend(allowed)
+
+        where = " AND ".join(clauses)
         row = conn.execute(
-            """
-            SELECT id, username, name, major, height, age, year, pronouns, about, photo_path
+            f"""
+            SELECT id, username, name, major, height, age, year, pronouns, gender, about, photo_path
             FROM users
-            WHERE id != ?
-              AND id NOT IN (
-                  SELECT swiped_id FROM swipes WHERE swiper_id = ?
-              )
+            WHERE {where}
             ORDER BY created_at ASC
             LIMIT 1
             """,
-            (user_id, user_id),
+            params,
         ).fetchone()
     return dict(row) if row else None
 

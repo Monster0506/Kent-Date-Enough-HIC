@@ -37,7 +37,7 @@ def _nc(user_id):
 def _get_user(user_id):
     with get_conn() as conn:
         row = conn.execute(
-            "SELECT username, name, major, height, age, year, pronouns, about, photo_path, created_at FROM users WHERE id = ?",
+            "SELECT username, name, major, height, age, year, pronouns, gender, about, photo_path, created_at FROM users WHERE id = ?",
             (user_id,),
         ).fetchone()
     return dict(row) if row else {}
@@ -111,6 +111,7 @@ def profile_post(req):
     height   = forms.get("height", "").strip()
     year     = forms.get("year", "").strip()
     pronouns = forms.get("pronouns", "").strip()
+    gender   = forms.get("gender", "").strip()
     about    = forms.get("about", "").strip()
     age      = forms.get("age", "").strip()
 
@@ -132,13 +133,13 @@ def profile_post(req):
     with get_conn() as conn:
         if photo_path:
             conn.execute(
-                "UPDATE users SET username=?, name=?, major=?, height=?, age=?, year=?, pronouns=?, about=?, photo_path=? WHERE id=?",
-                (username, name, major, height, int(age), year, pronouns, about, photo_path, user_id),
+                "UPDATE users SET username=?, name=?, major=?, height=?, age=?, year=?, pronouns=?, gender=?, about=?, photo_path=? WHERE id=?",
+                (username, name, major, height, int(age), year, pronouns, gender, about, photo_path, user_id),
             )
         else:
             conn.execute(
-                "UPDATE users SET username=?, name=?, major=?, height=?, age=?, year=?, pronouns=?, about=? WHERE id=?",
-                (username, name, major, height, int(age), year, pronouns, about, user_id),
+                "UPDATE users SET username=?, name=?, major=?, height=?, age=?, year=?, pronouns=?, gender=?, about=? WHERE id=?",
+                (username, name, major, height, int(age), year, pronouns, gender, about, user_id),
             )
 
     return app.render("profile.html", user=_get_user(user_id), error=None, success=True, notif_count=_nc(user_id))
@@ -180,7 +181,8 @@ def discover_get(req):
     me = _get_user(user_id)
     if not me.get("name") or not me.get("age"):
         return redirect("/profile")
-    profile = get_next_profile(user_id)
+    settings = get_user_settings(user_id)
+    profile = get_next_profile(user_id, settings)
     toast   = req.query("toast") or ""
     return app.render("discover.html", profile=profile, toast=toast, notif_count=_nc(user_id))
 

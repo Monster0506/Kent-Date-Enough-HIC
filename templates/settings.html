@@ -15,10 +15,10 @@
             <h1 class="card-header">Match With?</h1>
             <h2>Majors</h2>
             <form class="pref-form" name="matchSettings" method="POST" action="/settings">
-                <select id="majorsMatchSelection" name="majorsMatchSelection">
-                    <option value="all" {% if settings.match_all_majors %}selected{% endif %}>All Majors</option>
-                    <option value="same" {% if not settings.match_all_majors %}selected{% endif %}>Same Major</option>
-                </select>
+                <div>
+                    <input type="checkbox" id="majorsMatchSelection" name="majorsMatchSelection" value="all" {% if settings.match_all_majors %}checked{% endif %}>
+                    <label for="majorsMatchSelection">Match all majors (uncheck to same major only)</label>
+                </div>
 
             <h2>Genders</h2>
                 <div>

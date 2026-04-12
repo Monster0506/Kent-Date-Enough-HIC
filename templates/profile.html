@@ -40,6 +40,12 @@
                     <div class="profile-fields">
                         <input type="text" name="name" placeholder="Name" value="{{ user.name or '' }}" required>
                         <input type="text" name="pronouns" placeholder="Pronouns (e.g. she/her)" value="{{ user.pronouns or '' }}">
+                        <select name="gender" class="profile-select">
+                            <option value="" disabled {% if not user.gender %}selected{% endif %}>Gender</option>
+                            {% for opt in ['Men', 'Women', 'Nonbinary', 'Other'] %}
+                            <option value="{{ opt }}" {% if user.gender == opt %}selected{% endif %}>{{ opt }}</option>
+                            {% endfor %}
+                        </select>
                         <input type="text" name="major" placeholder="Major" value="{{ user.major or '' }}">
                         <select name="year" class="profile-select">
                             <option value="" disabled {% if not user.year %}selected{% endif %}>Year</option>
