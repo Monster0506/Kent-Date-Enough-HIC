@@ -2,7 +2,24 @@ import os
 import uuid
 from multipart import parse_form_data
 
-from db import dismiss_match_notification, get_conn, get_matches, get_messages, get_next_profile, get_notifications, hash_password, init_db, mark_messages_read, record_swipe, send_message, verify_password, update_user_settings, get_user_settings, get_user_testimonial, upsert_testimonial
+from db import (
+    dismiss_match_notification,
+    get_conn,
+    get_matches,
+    get_messages,
+    get_next_profile,
+    get_notifications,
+    hash_password,
+    init_db,
+    mark_messages_read,
+    record_swipe,
+    send_message,
+    verify_password,
+    update_user_settings,
+    get_user_settings,
+    get_user_testimonial,
+    upsert_testimonial,
+)
 from kindling import Application
 from kindling.reactive import on, signal
 from urllib.parse import quote as _url_quote
@@ -21,6 +38,7 @@ os.makedirs(PROFILE_IMAGES_DIR, exist_ok=True)
 
 def _parse_form(req):
     import io
+
     environ = {
         "wsgi.input": io.BytesIO(req.body),
         "CONTENT_TYPE": req.header("content-type", "") or "",
@@ -49,7 +67,7 @@ def landing(req):
 
 
 with app.reactive("signup", path="/signup", template="signup.html") as _signup:
-    _error   = signal("")
+    _error = signal("")
     _success = signal(False)
     _signup.expose(error=_error, success=_success)
 
@@ -57,8 +75,8 @@ with app.reactive("signup", path="/signup", template="signup.html") as _signup:
     def handle_signup(req):
         username = (req.form_value("username") or "").strip()
         password = req.form_value("password") or ""
-        confirm  = req.form_value("confirm_password") or ""
-        _error.value   = ""
+        confirm = req.form_value("confirm_password") or ""
+        _error.value = ""
         _success.value = False
 
         if not username or not password:
@@ -72,7 +90,9 @@ with app.reactive("signup", path="/signup", template="signup.html") as _signup:
             return
 
         with get_conn() as conn:
-            if conn.execute("SELECT id FROM users WHERE username = ?", (username,)).fetchone():
+            if conn.execute(
+                "SELECT id FROM users WHERE username = ?", (username,)
+            ).fetchone():
                 _error.value = "Username already taken."
                 return
             conn.execute(
@@ -81,20 +101,23 @@ with app.reactive("signup", path="/signup", template="signup.html") as _signup:
             )
             user_id = conn.execute("SELECT last_insert_rowid()").fetchone()[0]
             print(user_id)
-            conn.execute(
-                "INSERT INTO user_settings(user_id) VALUES (?)",
-            (user_id,)
-            )
-
+            conn.execute("INSERT INTO user_settings(user_id) VALUES (?)", (user_id,))
 
         _success.value = True
+
 
 @app.get("/profile")
 def profile_get(req):
     user_id = get_session(req)
     if not user_id:
         return redirect("/login")
-    return app.render("profile.html", user=_get_user(user_id), error=None, success=False, notif_count=_nc(user_id))
+    return app.render(
+        "profile.html",
+        user=_get_user(user_id),
+        error=None,
+        success=False,
+        notif_count=_nc(user_id),
+    )
 
 
 @app.post("/profile")
@@ -106,19 +129,31 @@ def profile_post(req):
     forms, files = _parse_form(req)
 
     username = forms.get("username", "").strip()
-    name     = forms.get("name", "").strip()
-    major    = forms.get("major", "").strip()
-    height   = forms.get("height", "").strip()
-    year     = forms.get("year", "").strip()
+    name = forms.get("name", "").strip()
+    major = forms.get("major", "").strip()
+    height = forms.get("height", "").strip()
+    year = forms.get("year", "").strip()
     pronouns = forms.get("pronouns", "").strip()
-    gender   = forms.get("gender", "").strip()
-    about    = forms.get("about", "").strip()
-    age      = forms.get("age", "").strip()
+    gender = forms.get("gender", "").strip()
+    about = forms.get("about", "").strip()
+    age = forms.get("age", "").strip()
 
     if not name or not age:
-        return app.render("profile.html", user=_get_user(user_id), error="Name and age are required.", success=False, notif_count=_nc(user_id))
+        return app.render(
+            "profile.html",
+            user=_get_user(user_id),
+            error="Name and age are required.",
+            success=False,
+            notif_count=_nc(user_id),
+        )
     if not age.isdigit() or int(age) < 18:
-        return app.render("profile.html", user=_get_user(user_id), error="You must be at least 18 years old.", success=False, notif_count=_nc(user_id))
+        return app.render(
+            "profile.html",
+            user=_get_user(user_id),
+            error="You must be at least 18 years old.",
+            success=False,
+            notif_count=_nc(user_id),
+        )
 
     photo_path = None
     photo_file = files.get("photo")
@@ -134,15 +169,45 @@ def profile_post(req):
         if photo_path:
             conn.execute(
                 "UPDATE users SET username=?, name=?, major=?, height=?, age=?, year=?, pronouns=?, gender=?, about=?, photo_path=? WHERE id=?",
-                (username, name, major, height, int(age), year, pronouns, gender, about, photo_path, user_id),
+                (
+                    username,
+                    name,
+                    major,
+                    height,
+                    int(age),
+                    year,
+                    pronouns,
+                    gender,
+                    about,
+                    photo_path,
+                    user_id,
+                ),
             )
         else:
             conn.execute(
                 "UPDATE users SET username=?, name=?, major=?, height=?, age=?, year=?, pronouns=?, gender=?, about=? WHERE id=?",
-                (username, name, major, height, int(age), year, pronouns, gender, about, user_id),
+                (
+                    username,
+                    name,
+                    major,
+                    height,
+                    int(age),
+                    year,
+                    pronouns,
+                    gender,
+                    about,
+                    user_id,
+                ),
             )
 
-    return app.render("profile.html", user=_get_user(user_id), error=None, success=True, notif_count=_nc(user_id))
+    return app.render(
+        "profile.html",
+        user=_get_user(user_id),
+        error=None,
+        success=True,
+        notif_count=_nc(user_id),
+    )
+
 
 @app.get("/login")
 def login_get(req):
@@ -155,7 +220,9 @@ def login_post(req):
     password = req.form_value("password") or ""
 
     if not username or not password:
-        return app.render("login.html", error="Please enter your username and password.")
+        return app.render(
+            "login.html", error="Please enter your username and password."
+        )
 
     with get_conn() as conn:
         row = conn.execute(
@@ -183,8 +250,10 @@ def discover_get(req):
         return redirect("/profile")
     settings = get_user_settings(user_id)
     profile = get_next_profile(user_id, settings)
-    toast   = req.query("toast") or ""
-    return app.render("discover.html", profile=profile, toast=toast, notif_count=_nc(user_id))
+    toast = req.query("toast") or ""
+    return app.render(
+        "discover.html", profile=profile, toast=toast, notif_count=_nc(user_id)
+    )
 
 
 @app.post("/discover")
@@ -192,7 +261,7 @@ def discover_post(req):
     user_id = get_session(req)
     if not user_id:
         return redirect("/login")
-    action    = req.form_value("action") or ""
+    action = req.form_value("action") or ""
     swiped_id = int(req.form_value("swiped_id") or 0)
     toast = ""
     if swiped_id:
@@ -213,11 +282,20 @@ def chats_get(req):
         return redirect("/login")
     matches = get_matches(user_id)
     match_id = int(req.query("match") or 0)
-    active = next((m for m in matches if m["id"] == match_id), matches[0] if matches else None)
+    active = next(
+        (m for m in matches if m["id"] == match_id), matches[0] if matches else None
+    )
     messages = get_messages(active["id"]) if active else []
     if active:
         mark_messages_read(user_id, active["id"])
-    return app.render("chats.html", matches=matches, active=active, messages=messages, user_id=user_id, notif_count=_nc(user_id))
+    return app.render(
+        "chats.html",
+        matches=matches,
+        active=active,
+        messages=messages,
+        user_id=user_id,
+        notif_count=_nc(user_id),
+    )
 
 
 @app.post("/chats")
@@ -289,7 +367,9 @@ def settings_get(req):
         return redirect("/login")
     settings = get_user_settings(user_id)
     user = _get_user(user_id)
-    return app.render("settings.html", notif_count=_nc(user_id), settings=settings, user=user)
+    return app.render(
+        "settings.html", notif_count=_nc(user_id), settings=settings, user=user
+    )
 
 
 @app.get("/notifications")
@@ -310,7 +390,6 @@ def notifications_dismiss(req):
     if match_id:
         dismiss_match_notification(user_id, match_id)
     return redirect("/notifications")
-    
 
 
 @app.post("/settings")
@@ -318,17 +397,18 @@ def settings_post(req):
     user_id = get_session(req)
     if not user_id:
         return redirect("/login")
-    
-    #defaults to 0 since unselected check is not passed
-    match_all_majors = 1 if req.form.get("majorsMatchSelection") == ['all'] else 0
-    match_men    = 1 if req.form.get("genderSelectMen")   else 0
-    match_women  = 1 if req.form.get("genderSelectWomen") else 0
-    match_nb     = 1 if req.form.get("genderSelectNB")    else 0
-    match_other  = 1 if req.form.get("genderSelectOther") else 0
 
-    update_user_settings(user_id, match_all_majors, match_men, match_women, match_nb, match_other)
+    # defaults to 0 since unselected check is not passed
+    match_all_majors = 1 if req.form.get("majorsMatchSelection") == ["all"] else 0
+    match_men = 1 if req.form.get("genderSelectMen") else 0
+    match_women = 1 if req.form.get("genderSelectWomen") else 0
+    match_nb = 1 if req.form.get("genderSelectNB") else 0
+    match_other = 1 if req.form.get("genderSelectOther") else 0
+
+    update_user_settings(
+        user_id, match_all_majors, match_men, match_women, match_nb, match_other
+    )
     return redirect("/settings")
-
 
 
 @app.get("/logout")

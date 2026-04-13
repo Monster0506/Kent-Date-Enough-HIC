@@ -87,7 +87,8 @@ def init_db() -> None:
                 match_nb            INTEGER     DEFAULT 1,
                 match_other         INTEGER     DEFAULT 1
             );
-        """)
+        """
+        )
         cols = [r[1] for r in conn.execute("PRAGMA table_info(users)").fetchall()]
         if "gender" not in cols:
             conn.execute("ALTER TABLE users ADD COLUMN gender TEXT")
@@ -116,10 +117,10 @@ def get_next_profile(user_id: int, settings: dict | None = None) -> dict | None:
                 params.append(my_major)
 
             gender_map = {
-                "Men":       settings.get("match_men", 1),
-                "Women":     settings.get("match_women", 1),
+                "Men": settings.get("match_men", 1),
+                "Women": settings.get("match_women", 1),
                 "Nonbinary": settings.get("match_nb", 1),
-                "Other":     settings.get("match_other", 1),
+                "Other": settings.get("match_other", 1),
             }
             allowed = [g for g, v in gender_map.items() if v]
             if allowed and len(allowed) < 4:
@@ -233,7 +234,13 @@ def get_notifications(user_id: int) -> list[dict]:
             (user_id, user_id, user_id, user_id),
         ).fetchall()
         for m in matches:
-            notifs.append({"type": "match", "match_id": m["id"], "name": m["name"] or m["username"]})
+            notifs.append(
+                {
+                    "type": "match",
+                    "match_id": m["id"],
+                    "name": m["name"] or m["username"],
+                }
+            )
 
         unread_by_match = conn.execute(
             """SELECT m.id AS match_id,
@@ -250,14 +257,18 @@ def get_notifications(user_id: int) -> list[dict]:
             (user_id, user_id, user_id, user_id, user_id),
         ).fetchall()
         for row in unread_by_match:
-            notifs.append({
-                "type": "message",
-                "match_id": row["match_id"],
-                "name": row["name"] or row["username"],
-                "count": row["unread_count"],
-            })
+            notifs.append(
+                {
+                    "type": "message",
+                    "match_id": row["match_id"],
+                    "name": row["name"] or row["username"],
+                    "count": row["unread_count"],
+                }
+            )
 
-        row = conn.execute("SELECT name, age, photo_path FROM users WHERE id = ?", (user_id,)).fetchone()
+        row = conn.execute(
+            "SELECT name, age, photo_path FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
         if not row["name"] or not row["age"] or not row["photo_path"]:
             notifs.append({"type": "profile"})
 
@@ -283,7 +294,8 @@ def upsert_testimonial(user_id: int, body: str) -> None:
             )
         else:
             conn.execute(
-                "INSERT INTO testimonials (user_id, body) VALUES (?, ?)", (user_id, body)
+                "INSERT INTO testimonials (user_id, body) VALUES (?, ?)",
+                (user_id, body),
             )
 
 
@@ -293,35 +305,45 @@ def verify_password(password: str, stored: str) -> bool:
     key = hashlib.pbkdf2_hmac("sha256", password.encode(), salt, 260_000)
     return key.hex() == key_hex
 
-def update_user_settings(userID:int ,majorSetting: int, matchMen: int, matchWomen: int, matchNB: int, matchOther: int):
+
+def update_user_settings(
+    userID: int,
+    majorSetting: int,
+    matchMen: int,
+    matchWomen: int,
+    matchNB: int,
+    matchOther: int,
+):
     with get_conn() as conn:
         conn.execute(
-                    "INSERT INTO user_settings(user_id, match_all_majors, match_men, match_women, match_nb, match_other) "
-                    "VALUES (?, ?, ?, ?, ?, ?) "
-                    "ON CONFLICT(user_id) DO UPDATE SET "
-                    "match_all_majors=excluded.match_all_majors, "
-                    "match_men=excluded.match_men, "
-                    "match_women=excluded.match_women, "
-                    "match_nb=excluded.match_nb, "
-                    "match_other=excluded.match_other",
-                    (userID, majorSetting, matchMen, matchWomen, matchNB, matchOther)
-                )
+            "INSERT INTO user_settings(user_id, match_all_majors, match_men, match_women, match_nb, match_other) "
+            "VALUES (?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(user_id) DO UPDATE SET "
+            "match_all_majors=excluded.match_all_majors, "
+            "match_men=excluded.match_men, "
+            "match_women=excluded.match_women, "
+            "match_nb=excluded.match_nb, "
+            "match_other=excluded.match_other",
+            (userID, majorSetting, matchMen, matchWomen, matchNB, matchOther),
+        )
 
-def get_user_settings(userID:int):
+
+def get_user_settings(userID: int):
     with get_conn() as conn:
         settings = conn.execute(
             """
             SELECT match_all_majors, match_men, match_women, match_nb, match_other
             FROM user_settings
             WHERE user_id = ?
-            """, (userID,)
+            """,
+            (userID,),
         ).fetchone()
     if not settings:
         settings = {
-            "match_all_majors" : 1,
-            "match_men" : 1,
-            "match_women" : 1,
-            "match_nb" : 1,
-            "match_other" : 1
+            "match_all_majors": 1,
+            "match_men": 1,
+            "match_women": 1,
+            "match_nb": 1,
+            "match_other": 1,
         }
     return dict(settings)

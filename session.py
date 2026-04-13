@@ -16,7 +16,9 @@ def read_session_cookie(cookie: str | None) -> int | None:
         return None
     try:
         payload, sig = cookie.rsplit(".", 1)
-        expected = hmac.new(_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
+        expected = hmac.new(
+            _SECRET.encode(), payload.encode(), hashlib.sha256
+        ).hexdigest()
         if not hmac.compare_digest(sig, expected):
             return None
         return int(payload)
@@ -29,7 +31,7 @@ def get_session(req) -> int | None:
     for part in (raw or "").split(";"):
         part = part.strip()
         if part.startswith("session="):
-            return read_session_cookie(part[len("session="):])
+            return read_session_cookie(part[len("session=") :])
     return None
 
 
