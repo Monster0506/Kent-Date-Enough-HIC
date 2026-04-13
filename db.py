@@ -121,8 +121,9 @@ def hash_password(password: str) -> str:
 
 def get_next_profile(user_id: int, settings: dict | None = None) -> dict | None:
     with get_conn() as conn:
-        me = conn.execute("SELECT major FROM users WHERE id = ?", (user_id,)).fetchone()
+        me = conn.execute("SELECT major, year FROM users WHERE id = ?", (user_id,)).fetchone()
         my_major = me["major"] if me else None
+        my_year = me["year"] if me else None
 
         clauses = [
             "id != ?",
@@ -150,15 +151,48 @@ def get_next_profile(user_id: int, settings: dict | None = None) -> dict | None:
                 params.extend(allowed)
 
         where = " AND ".join(clauses)
+
+        # Scoring weights:
+        # +3 per shared CRN (same class section)
+        # +2 same major
+        # +1 same year
+        # +1 per overlapping free time block (same day letter + same hour window)
+        # guys sql is so very awesome there's no logic to matching other than this sql that's pretty cool
+        score_sql = f"""
+            (
+                SELECT COUNT(*) * 3
+                FROM user_schedules s1
+                JOIN user_schedules s2
+                  ON s1.crn = s2.crn
+                 AND s1.user_id = ?
+                 AND s2.user_id = u.id
+            )
+            + (CASE WHEN u.major = ? AND u.major IS NOT NULL AND u.major != '' THEN 2 ELSE 0 END)
+            + (CASE WHEN u.year  = ? AND u.year  IS NOT NULL AND u.year  != '' THEN 1 ELSE 0 END)
+
+            + (
+                SELECT COUNT(*) * 1
+                FROM user_schedules s1
+                JOIN user_schedules s2
+                  ON s1.user_id = ?
+                 AND s2.user_id = u.id
+                 AND s1.days LIKE '%' || substr(s2.days, 1, 1) || '%'
+                 AND substr(s1.time, 1, instr(s1.time || ':', ':') - 1)
+                   = substr(s2.time, 1, instr(s2.time || ':', ':') - 1)
+            )
+        """
+        score_params = [user_id, my_major or "", my_year or "", user_id]
+
         row = conn.execute(
             f"""
-            SELECT id, username, name, major, height, age, year, pronouns, gender, about, photo_path
-            FROM users
+            SELECT id, username, name, major, height, age, year, pronouns, gender, about, photo_path,
+                   ({score_sql}) AS compat_score
+            FROM users u
             WHERE {where}
-            ORDER BY created_at ASC
+            ORDER BY ({score_sql}) DESC, created_at ASC
             LIMIT 1
             """,
-            params,
+            params + score_params + score_params,
         ).fetchone()
     return dict(row) if row else None
 

@@ -108,6 +108,18 @@ body.discover .page-content {
     padding: 0.6rem 1rem;
 }
 
+.compat-bar-wrap {
+    padding: 0 1rem 0.55rem;
+    text-align: center;
+}
+
+.compat-label {
+    font-family: 'Jura', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
 .card-photo {
     display: block;
     width: 100%;

@@ -45,6 +45,12 @@
                          · <span {% if not profile.height %}class="card-field-empty"{% endif %}>{{ profile.height or "Height not listed" }}</span>
                     </div>
 
+                    {% if profile.compat_score %}
+                    <div class="compat-bar-wrap">
+                        <span class="compat-label">{{ profile.compat_score }} compatibility</span>
+                    </div>
+                    {% endif %}
+
                     {% if profile.photo_path %}
                     <img class="card-photo" src="/static/{{ profile.photo_path }}" alt="{{ profile.name or profile.username }}">
                     {% else %}
