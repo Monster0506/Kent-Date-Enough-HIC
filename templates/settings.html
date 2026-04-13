@@ -1,63 +1,65 @@
 {%extends "base.html" %}
 
 {% block title %}Settings — Kent Date Enough{% endblock %}
-{% block body_class %}settings{% endblock %}
-
-{% block head %}
-<link rel="stylesheet" href="/static/css/settings.css">
-{% endblock %}
 
 {% block content %}
     {% include '_bolt_bg.html' %}
 
 {% with active_nav = 'settings' %}{% include '_nav.html' %}{% endwith %}
-<div class="card-wrapper">
-    <div class="settings-card left-card">
-        <div class="card-content">
-            <h1 class="card-header">Match With?</h1>
-            <h2>Majors</h2>
-            <form class="pref-form" name="matchSettings" method="POST" action="/settings">
-                <div>
-                    <input type="checkbox" id="majorsMatchSelection" name="majorsMatchSelection" value="all" {% if settings.match_all_majors %}checked{% endif %}>
-                    <label for="majorsMatchSelection">Match all majors (uncheck to same major only)</label>
+
+<div class="flex flex-row items-stretch w-screen h-screen">
+
+    <!-- Left card: Match preferences -->
+    <div class="flex flex-col bg-brand-gray text-black z-10 flex-grow m-[5%] rounded-2xl">
+        <div class="flex flex-col flex-1 gap-5 m-[2%]">
+            <h1 class="mb-4 mt-[3%] font-jura text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-brand-blue">Match With?</h1>
+            <h2 class="font-jura font-bold text-brand-blue">Majors</h2>
+            <form class="flex flex-col gap-4" name="matchSettings" method="POST" action="/settings">
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="majorsMatchSelection" name="majorsMatchSelection" value="all" {% if settings.match_all_majors %}checked{% endif %} class="w-4 h-4 cursor-pointer accent-brand-blue">
+                    <label for="majorsMatchSelection" class="font-inter text-sm cursor-pointer">Match all majors (uncheck to same major only)</label>
                 </div>
 
-            <h2>Genders</h2>
-                <div>
-                    <input type="checkbox" id="genderSelectMen" name="genderSelectMen" value="Men" {% if settings.match_men %}checked{% endif %}>
-                    <label for="genderSelectMen">Men</label>
+                <h2 class="font-jura font-bold text-brand-blue">Genders</h2>
+
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="genderSelectMen" name="genderSelectMen" value="Men" {% if settings.match_men %}checked{% endif %} class="w-4 h-4 cursor-pointer accent-brand-blue">
+                    <label for="genderSelectMen" class="font-inter text-sm cursor-pointer">Men</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="genderSelectWomen" name="genderSelectWomen" value="Women" {% if settings.match_women %}checked{% endif %} class="w-4 h-4 cursor-pointer accent-brand-blue">
+                    <label for="genderSelectWomen" class="font-inter text-sm cursor-pointer">Women</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="genderSelectNB" name="genderSelectNB" value="NB" {% if settings.match_nb %}checked{% endif %} class="w-4 h-4 cursor-pointer accent-brand-blue">
+                    <label for="genderSelectNB" class="font-inter text-sm cursor-pointer">Nonbinary</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="genderSelectOther" name="genderSelectOther" value="Other" {% if settings.match_other %}checked{% endif %} class="w-4 h-4 cursor-pointer accent-brand-blue">
+                    <label for="genderSelectOther" class="font-inter text-sm cursor-pointer">Other</label>
                 </div>
 
-                <div>
-                    <input type="checkbox" id="genderSelectWomen" name="genderSelectWomen" value="Women" {% if settings.match_women %}checked{% endif %}>
-                    <label for="genderSelectWomen">Women</label>
-                </div>
-
-                <div>
-                    <input type="checkbox" id="genderSelectNB" name="genderSelectNB" value="NB" {% if settings.match_nb %}checked{% endif %}>
-                    <label for="genderSelectNB">Nonbinary</label>
-                </div>
-
-                <div>
-                    <input type="checkbox" id="genderSelectOther" name="genderSelectOther" value="Other" {% if settings.match_other %}checked{% endif %}>
-                    <label for="genderSelectOther">Other</label>
-                </div>
-
-                <input class="btn btn-submit" type="submit" value="Submit">
+                <input type="submit" value="Submit"
+                    class="inline-block py-[0.65rem] px-[1.8rem] rounded-full font-bold text-base cursor-pointer border-2 border-transparent bg-brand-blue text-brand-yellow w-fit hover:opacity-85 transition-opacity duration-150">
             </form>
         </div>
     </div>
 
-    <div class="settings-card right-card">
-        <div class="card-content">
-            <h1 class="card-header">Account Information</h1>
-            <h3>Username: {%if user.username %}{{user.username}}{%endif%}</h3>
-            <h3>Password</h3>
-                <a class="btn btn-danger-sm" href="/reset-password">Reset Password</a>
-
-            <h3>Created at: {%if user.created_at %}{{user.created_at}}{% endif %}</h3>
-            <button class="btn btn-danger-lg btn-delete-acc">Delete Account</button>
+    <!-- Right card: Account info -->
+    <div class="flex flex-col bg-brand-gray text-black z-10 flex-grow m-[5%] rounded-2xl">
+        <div class="flex flex-col flex-1 gap-5 m-[2%]">
+            <h1 class="mb-4 mt-[3%] font-jura text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-brand-blue">Account Information</h1>
+            <h3 class="font-inter font-bold text-brand-blue">Username: {%if user.username %}{{user.username}}{%endif%}</h3>
+            <h3 class="font-inter font-bold text-brand-blue">Password</h3>
+            <button class="inline-block py-[0.65rem] px-[1.8rem] rounded-full font-bold text-sm cursor-pointer border-2 bg-brand-danger text-white border-brand-danger w-fit hover:opacity-85 transition-opacity duration-150">
+                Reset Password
+            </button>
+            <h3 class="font-inter font-bold text-brand-blue">Created at: {%if user.created_at %}{{user.created_at}}{% endif %}</h3>
+            <button class="inline-block py-[0.65rem] px-[1.8rem] rounded-full font-bold text-base cursor-pointer border-2 bg-brand-danger text-white border-brand-danger hover:opacity-85 transition-opacity duration-150 mt-auto mb-[5%]">
+                Delete Account
+            </button>
         </div>
     </div>
+
 </div>
 {% endblock %}

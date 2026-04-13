@@ -1,68 +1,81 @@
 {% extends "base.html" %}
 
 {% block title %}My Profile — Kent Date Enough{% endblock %}
-{% block body_class %}discover{% endblock %}
-
-{% block head %}
-<link rel="stylesheet" href="/static/css/discover.css">
-<link rel="stylesheet" href="/static/css/profile.css">
-{% endblock %}
+{% block body_class %}overflow-hidden{% endblock %}
 
 {% block layout %}
-<div class="discover-shell">
+<div class="w-screen h-screen overflow-hidden relative">
 
     {% with active_nav = 'profile' %}{% include '_nav.html' %}{% endwith %}
 
-    <main class="discover-main">
+    <main class="w-full h-full relative flex items-center justify-center">
         {% include '_bolt_bg.html' %}
 
-        <div class="discover-center">
-            <form class="profile-panel" method="post" action="/profile" enctype="multipart/form-data">
+        <div class="relative z-10 flex flex-col items-center gap-4 p-6">
 
-                <h1 class="profile-title card-page-title">My Profile</h1>
+            <form class="profile-panel grid gap-10 bg-brand-slate rounded-2xl p-10 w-[min(90vw,1040px)]"
+                style="grid-template-columns: 1fr 1.3fr;"
+                method="post" action="/profile" enctype="multipart/form-data">
 
-                <div class="profile-left">
-                    <label class="profile-photo-wrap">
+                <h1 class="col-span-full font-jura text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-brand-blue m-0">My Profile</h1>
+
+                <!-- Left column -->
+                <div class="flex flex-col gap-6">
+                    <label class="block cursor-pointer w-full aspect-square rounded-[6px] overflow-hidden shrink-0">
                         {% if user.photo_path %}
-                            <img src="/static/{{ user.photo_path }}" alt="Profile photo" id="photo-preview" class="profile-photo-img">
+                            <img src="/static/{{ user.photo_path }}" alt="Profile photo" id="photo-preview"
+                                class="w-full h-full object-cover object-top block">
                         {% else %}
-                            <div class="profile-photo-placeholder" id="photo-placeholder">
+                            <div class="w-full h-full bg-brand-blue flex items-center justify-center text-[3.5rem] text-brand-slate" id="photo-placeholder">
                                 <i class="fa fa-user"></i>
                             </div>
-                            <img src="" alt="" id="photo-preview" class="profile-photo-img" style="display:none">
+                            <img src="" alt="" id="photo-preview" class="w-full h-full object-cover object-top block" style="display:none">
                         {% endif %}
-                        <input type="file" name="photo" accept="image/*" id="photo-input">
+                        <input type="file" name="photo" accept="image/*" id="photo-input" class="hidden">
                     </label>
-                    <textarea name="about" placeholder="Traits (comma separated)" class="profile-about">{{ user.about or '' }}</textarea>
+
+                    <textarea name="about" placeholder="Traits (comma separated)"
+                        class="w-full flex-1 min-h-[160px] py-[1.2rem] px-[1.5rem] border-none rounded-xl bg-white font-inter text-[1.1rem] text-black outline-none resize-none placeholder:text-brand-gray">{{ user.about or '' }}</textarea>
                 </div>
 
-                <div class="profile-right">
-                    <div class="profile-fields">
-                        <input type="text" name="name" placeholder="Name" value="{{ user.name or '' }}" required>
-                        <input type="text" name="pronouns" placeholder="Pronouns (e.g. she/her)" value="{{ user.pronouns or '' }}">
-                        <select name="gender" class="profile-select">
-                            <option value="" disabled {% if not user.gender %}selected{% endif %}>Gender</option>
+                <!-- Right column -->
+                <div class="flex flex-col gap-6 justify-between">
+                    <div class="flex flex-col gap-[1.2rem]">
+                        <input type="text" name="name" placeholder="Name" value="{{ user.name or '' }}" required
+                            class="w-full py-[1.2rem] px-[1.5rem] border-none rounded-xl bg-white font-inter text-[1.1rem] text-black outline-none focus:shadow-[0_0_0_2px_#023672] placeholder:text-brand-gray">
+                        <input type="text" name="pronouns" placeholder="Pronouns (e.g. she/her)" value="{{ user.pronouns or '' }}"
+                            class="w-full py-[1.2rem] px-[1.5rem] border-none rounded-xl bg-white font-inter text-[1.1rem] text-black outline-none focus:shadow-[0_0_0_2px_#023672] placeholder:text-brand-gray">
+                        <select name="gender"
+                            class="w-full py-[1.2rem] px-[1.5rem] border-none rounded-xl bg-white font-inter text-[1.1rem] text-black outline-none appearance-none cursor-pointer focus:shadow-[0_0_0_2px_#023672]">
+                            <option value="" disabled {% if not user.gender %}selected{% endif %} class="text-brand-gray">Gender</option>
                             {% for opt in ['Men', 'Women', 'Nonbinary', 'Other'] %}
                             <option value="{{ opt }}" {% if user.gender == opt %}selected{% endif %}>{{ opt }}</option>
                             {% endfor %}
                         </select>
-                        <input type="text" name="major" placeholder="Major" value="{{ user.major or '' }}">
-                        <select name="year" class="profile-select">
-                            <option value="" disabled {% if not user.year %}selected{% endif %}>Year</option>
+                        <input type="text" name="major" placeholder="Major" value="{{ user.major or '' }}"
+                            class="w-full py-[1.2rem] px-[1.5rem] border-none rounded-xl bg-white font-inter text-[1.1rem] text-black outline-none focus:shadow-[0_0_0_2px_#023672] placeholder:text-brand-gray">
+                        <select name="year"
+                            class="w-full py-[1.2rem] px-[1.5rem] border-none rounded-xl bg-white font-inter text-[1.1rem] text-black outline-none appearance-none cursor-pointer focus:shadow-[0_0_0_2px_#023672]">
+                            <option value="" disabled {% if not user.year %}selected{% endif %} class="text-brand-gray">Year</option>
                             {% for opt in ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Grad Student'] %}
                             <option value="{{ opt }}" {% if user.year == opt %}selected{% endif %}>{{ opt }}</option>
                             {% endfor %}
                         </select>
-                        <input type="text" name="height" placeholder="Height (e.g. 5'10&quot;)" value="{{ user.height or '' }}">
-                        <input type="number" name="age" placeholder="Age" value="{{ user.age or '' }}" min="18" required>
+                        <input type="text" name="height" placeholder="Height (e.g. 5'10&quot;)" value="{{ user.height or '' }}"
+                            class="w-full py-[1.2rem] px-[1.5rem] border-none rounded-xl bg-white font-inter text-[1.1rem] text-black outline-none focus:shadow-[0_0_0_2px_#023672] placeholder:text-brand-gray">
+                        <input type="number" name="age" placeholder="Age" value="{{ user.age or '' }}" min="18" required
+                            class="w-full py-[1.2rem] px-[1.5rem] border-none rounded-xl bg-white font-inter text-[1.1rem] text-black outline-none focus:shadow-[0_0_0_2px_#023672] placeholder:text-brand-gray">
                     </div>
 
-                    {% if success %}<p class="profile-success">Profile updated!</p>{% endif %}
-                    {% if error %}<p class="profile-error">{{ error }}</p>{% endif %}
+                    {% if success %}<p class="text-[0.85rem] text-brand-blue font-semibold text-center">Profile updated!</p>{% endif %}
+                    {% if error %}<p class="text-[0.85rem] text-brand-danger text-center">{{ error }}</p>{% endif %}
 
                     <input type="hidden" name="username" value="{{ user.username or '' }}">
 
-                    <button type="submit" class="profile-save">Save &#x2197;</button>
+                    <button type="submit"
+                        class="self-stretch py-[1.3rem] px-12 bg-white border-2 border-brand-blue rounded-xl font-inter text-[1.2rem] font-bold text-brand-blue cursor-pointer transition-colors duration-150 hover:bg-brand-blue hover:text-brand-cream mt-auto">
+                        Save &#x2197;
+                    </button>
                 </div>
 
             </form>
@@ -74,32 +87,22 @@
 <script>
 var dirty = false;
 
-document.querySelector('.profile-panel').addEventListener('change', function() {
-    dirty = true;
-});
-document.querySelector('.profile-panel').addEventListener('input', function() {
-    dirty = true;
-});
-
-document.querySelector('.profile-panel').addEventListener('submit', function() {
-    dirty = false;
-});
+document.querySelector('.profile-panel').addEventListener('change', function() { dirty = true; });
+document.querySelector('.profile-panel').addEventListener('input',  function() { dirty = true; });
+document.querySelector('.profile-panel').addEventListener('submit', function() { dirty = false; });
 
 window.addEventListener('beforeunload', function(e) {
-    if (dirty) {
-        e.preventDefault();
-        e.returnValue = '';
-    }
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
 });
 
 document.getElementById('photo-input').addEventListener('change', function() {
     dirty = true;
-    const file = this.files[0];
+    var file = this.files[0];
     if (!file) return;
-    const reader = new FileReader();
+    var reader = new FileReader();
     reader.onload = function(e) {
-        const preview = document.getElementById('photo-preview');
-        const placeholder = document.getElementById('photo-placeholder');
+        var preview     = document.getElementById('photo-preview');
+        var placeholder = document.getElementById('photo-placeholder');
         preview.src = e.target.result;
         preview.style.display = 'block';
         if (placeholder) placeholder.style.display = 'none';

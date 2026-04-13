@@ -1,0 +1,310 @@
+{# keybindings.html - Include in base.html with: {% include 'keybindings.html' %} #}
+
+<script>
+  (function () {
+    "use strict";
+
+    // -----------------------------------------------------------------------
+    // KEYBINDING DEFINITIONS
+    // -----------------------------------------------------------------------
+    const KEYBINDINGS = [
+      // — Navigation —
+      {
+        key: "h",
+        description: "Go to Landing / Home",
+        action: () => navigateTo("/"),
+      },
+      {
+        key: "d",
+        description: "Go to Discover",
+        action: () => navigateTo("/discover"),
+      },
+      {
+        key: "c",
+        description: "Go to Chats",
+        action: () => navigateTo("/chats"),
+      },
+      {
+        key: "n",
+        description: "Go to Notifications",
+        action: () => navigateTo("/notifications"),
+      },
+      {
+        key: "p",
+        description: "Go to Profile",
+        action: () => navigateTo("/profile"),
+      },
+      {
+        key: "s",
+        description: "Go to Schedule",
+        action: () => navigateTo("/schedule"),
+      },
+      {
+        key: "t",
+        description: "Go to Testimonials",
+        action: () => navigateTo("/testimonials"),
+      },
+
+      // — Account —
+      {
+        key: ",",
+        description: "Go to Settings",
+        action: () => navigateTo("/settings"),
+      },
+      {
+        key: "L",
+        shift: true,        // Shift+L
+        description: "Go to Login",
+        action: () => navigateTo("/login"),
+      },
+      {
+        key: "R",
+        shift: true,        // Shift+R
+        description: "Go to Sign Up",
+        action: () => navigateTo("/signup"),
+      },
+
+    //   // — Utility —
+    //   {
+    //     key: "/",
+    //     // FIX: "/" is typed without Shift — no shift flag needed.
+    //     // focusSearch() blurs first so re-pressing "/" re-focuses correctly.
+    //     description: "Focus search",
+    //     action: () => focusSearch(),
+    //   },
+      {
+        key: "Escape",
+        // FIX: added blur fallback so Escape is always visibly useful,
+        // even when no modal or help overlay is open.
+        description: "Close / dismiss / blur",
+        action: () => closeActive(),
+      },
+      {
+        key: "?",
+        shift: true,        // FIX: "?" is Shift+/ on every standard keyboard,
+                            // so e.shiftKey is always true when "?" is pressed.
+                            // Without this, shiftMatch was false === true → no match.
+        description: "Show keyboard shortcuts",
+        action: () => toggleHelp(),
+      },
+    ];
+
+    // -----------------------------------------------------------------------
+    // HELPERS
+    // -----------------------------------------------------------------------
+    function navigateTo(path) {
+      window.location.href = path;
+    }
+
+    function focusSearch() {
+      const el =
+        document.querySelector('[data-keybind="search"]') ||
+        document.querySelector('input[type="search"]') ||
+        document.querySelector('input[name="q"]');
+      if (el) {
+        el.focus();
+        el.select();
+      }
+      // If no search field exists on this page, "/" still
+      // preventDefault()s (stops browser quick-find), which is fine.
+    }
+
+    function closeActive() {
+      // 1. Close any open modal
+      const modal = document.querySelector('[data-modal][aria-hidden="false"]');
+      if (modal) {
+        modal.setAttribute("aria-hidden", "true");
+        return;
+      }
+      // 2. Close help overlay if open
+      if (helpVisible) {
+        hideHelp();
+        return;
+      }
+      // 3. FIX: fallback — blur whatever element currently has focus
+      //    (e.g. a chat input, a button) so Escape always does something visible.
+      if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.blur();
+      }
+    }
+
+    // -----------------------------------------------------------------------
+    // HELP OVERLAY
+    // -----------------------------------------------------------------------
+    let helpVisible = false;
+    let overlay = null;
+
+    const SECTIONS = [
+      { heading: "Navigation", keys: ["h", "d", "c", "n", "p", "s", "t"] },
+      { heading: "Account",    keys: ["L", "R", ","] },
+      { heading: "Utility",    keys: ["/", "Escape", "?"] },
+    ];
+
+    function buildHelpOverlay() {
+      const ov = document.createElement("div");
+      ov.id = "kb-help-overlay";
+      ov.setAttribute("aria-modal", "true");
+      ov.setAttribute("role", "dialog");
+      ov.setAttribute("aria-label", "Keyboard shortcuts");
+      ov.setAttribute("aria-hidden", "true");
+      ov.style.cssText = [
+        "display:none",
+        "position:fixed",
+        "inset:0",
+        "z-index:9999",
+        "background:rgba(0,0,0,.6)",
+        "backdrop-filter:blur(3px)",
+        "align-items:center",
+        "justify-content:center",
+        "font-family:inherit",
+      ].join(";");
+
+      const box = document.createElement("div");
+      box.style.cssText = [
+        "background:#1e1e2e",
+        "color:#cdd6f4",
+        "border-radius:12px",
+        "padding:1.75rem 2rem",
+        "min-width:340px",
+        "max-width:520px",
+        "width:92%",
+        "box-shadow:0 12px 48px rgba(0,0,0,.5)",
+        "border:1px solid rgba(255,255,255,.08)",
+      ].join(";");
+
+      const title = document.createElement("h2");
+      title.textContent = "Keyboard Shortcuts";
+      title.style.cssText =
+        "margin:0 0 1.25rem;font-size:1.05rem;font-weight:600;" +
+        "border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:.85rem;letter-spacing:.02em";
+      box.appendChild(title);
+
+      // Build lookup map by binding.key
+      const bindingMap = {};
+      KEYBINDINGS.forEach((b) => { bindingMap[b.key] = b; });
+
+      SECTIONS.forEach(({ heading, keys }) => {
+        const sectionTitle = document.createElement("p");
+        sectionTitle.textContent = heading;
+        sectionTitle.style.cssText =
+          "margin:.9rem 0 .45rem;font-size:.7rem;font-weight:700;" +
+          "text-transform:uppercase;letter-spacing:.1em;color:#6c7086";
+        box.appendChild(sectionTitle);
+
+        const grid = document.createElement("dl");
+        grid.style.cssText =
+          "margin:0;display:grid;grid-template-columns:auto 1fr;gap:.3rem .75rem;align-items:center";
+
+        keys.forEach((k) => {
+          const b = bindingMap[k];
+          if (!b) return;
+
+          const combo = [
+            b.ctrl  ? (navigator.platform.includes("Mac") ? "⌘" : "Ctrl") : null,
+            b.alt   ? "Alt"   : null,
+            b.shift ? "Shift" : null,
+            b.key === " " ? "Space" : b.key,
+          ]
+            .filter(Boolean)
+            .join("+");
+
+          const dt = document.createElement("dt");
+          dt.innerHTML = combo
+            .split("+")
+            .map(
+              (part) =>
+                `<kbd style="display:inline-block;padding:.15em .5em;` +
+                `border:1px solid rgba(255,255,255,.18);border-bottom-width:2px;` +
+                `border-radius:5px;background:#313244;font-size:.75rem;` +
+                `font-family:ui-monospace,monospace;white-space:nowrap;color:#cdd6f4">${part}</kbd>`
+            )
+            .join('<span style="margin:0 2px;color:#6c7086">+</span>');
+
+          const dd = document.createElement("dd");
+          dd.textContent = b.description;
+          dd.style.cssText = "margin:0;font-size:.875rem;color:#a6adc8";
+
+          grid.appendChild(dt);
+          grid.appendChild(dd);
+        });
+
+        box.appendChild(grid);
+      });
+
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "Close  esc";
+      closeBtn.style.cssText = [
+        "margin-top:1.5rem",
+        "display:block",
+        "margin-left:auto",
+        "padding:.4rem 1.1rem",
+        "border:1px solid rgba(255,255,255,.15)",
+        "border-radius:6px",
+        "background:rgba(255,255,255,.06)",
+        "color:#a6adc8",
+        "cursor:pointer",
+        "font-size:.8rem",
+        "letter-spacing:.03em",
+      ].join(";");
+      closeBtn.addEventListener("click", hideHelp);
+      box.appendChild(closeBtn);
+
+      ov.appendChild(box);
+      ov.addEventListener("click", (e) => { if (e.target === ov) hideHelp(); });
+      document.body.appendChild(ov);
+      return ov;
+    }
+
+    function toggleHelp() { helpVisible ? hideHelp() : showHelp(); }
+
+    function showHelp() {
+      if (!overlay) overlay = buildHelpOverlay();
+      overlay.style.display = "flex";
+      overlay.setAttribute("aria-hidden", "false");
+      helpVisible = true;
+    }
+
+    function hideHelp() {
+      if (!overlay) return;
+      overlay.style.display = "none";
+      overlay.setAttribute("aria-hidden", "true");
+      helpVisible = false;
+    }
+
+    // -----------------------------------------------------------------------
+    // EVENT LISTENER
+    // -----------------------------------------------------------------------
+    function isEditableTarget(el) {
+      if (!el) return false;
+      const tag = el.tagName;
+      return (
+        tag === "INPUT"    ||
+        tag === "TEXTAREA" ||
+        tag === "SELECT"   ||
+        el.isContentEditable
+      );
+    }
+
+    document.addEventListener("keydown", function (e) {
+      // Block all shortcuts while typing EXCEPT Escape (always fires)
+      if (isEditableTarget(e.target) && e.key !== "Escape") return;
+
+      for (const binding of KEYBINDINGS) {
+        // Key match: case-insensitive for letters, exact for symbols
+        const keyMatch =
+          e.key === binding.key ||
+          e.key.toLowerCase() === binding.key.toLowerCase();
+
+        const ctrlMatch  = !!binding.ctrl  === (e.ctrlKey || e.metaKey);
+        const shiftMatch = !!binding.shift === e.shiftKey;
+        const altMatch   = !!binding.alt   === e.altKey;
+
+        if (keyMatch && ctrlMatch && shiftMatch && altMatch) {
+          e.preventDefault();
+          binding.action();
+          return;
+        }
+      }
+    });
+  })();
+</script>

@@ -1,85 +1,89 @@
 {% extends "base.html" %}
 
 {% block title %}Discover — Kent Date Enough{% endblock %}
-{% block body_class %}discover{% endblock %}
-
-{% block head %}
-<link rel="stylesheet" href="/static/css/discover.css">
-{% endblock %}
+{% block body_class %}overflow-hidden{% endblock %}
 
 {% block layout %}
-<div class="discover-shell">
+<div class="w-screen h-screen overflow-hidden relative">
 
     {% with active_nav = 'discover' %}{% include '_nav.html' %}{% endwith %}
 
-    <main class="discover-main">
+    <main class="w-full h-full relative flex items-center justify-center">
         {% include '_bolt_bg.html' %}
 
-        <div class="discover-center">
+        <div class="relative z-10 flex flex-col items-center gap-4 p-6">
 
-            <h1 class="page-bolt-title">Discover</h1>
+            <h1 class="font-jura font-bold text-white m-0 text-[clamp(1.8rem,4vw,2.8rem)] [text-shadow:0_1px_6px_rgba(2,54,114,0.7),0_2px_14px_rgba(2,54,114,0.4)]">Discover</h1>
 
             {% if toast %}
-            <div class="discover-toast">{{ toast }}</div>
+            <div class="bg-brand-yellow text-brand-blue font-jura font-bold text-[1.05rem] py-[0.55rem] px-6 rounded animate-toast-in">
+                {{ toast }}
+            </div>
             {% endif %}
 
             {% if profile %}
-            <div class="card-wrapper">
+            <div class="flex flex-row items-stretch w-[min(90vw,780px)]">
 
-                <form id="discover-reject" method="post" action="/discover" class="side-panel reject-panel">
+                <!-- Reject -->
+                <form id="discover-reject" method="post" action="/discover" class="w-[85px] shrink-0 flex items-stretch rounded-[6px]">
                     <input type="hidden" name="action" value="reject">
                     <input type="hidden" name="swiped_id" value="{{ profile.id }}">
-                    <button type="submit" title="Reject (left arrow key)">
-                        <i class="fa-solid fa-arrow-left"></i>
+                    <button type="submit" title="Reject (left arrow key)"
+                        class="flex-1 border-none rounded-l-[6px] cursor-pointer flex flex-col items-center justify-center gap-2 font-inter text-[0.75rem] font-semibold text-brand-blue p-2 transition-[filter] duration-150 hover:brightness-90 bg-brand-red w-full">
+                        <i class="fa-solid fa-arrow-left text-[1.1rem]"></i>
                         <span>Reject</span>
                     </button>
                 </form>
 
-                <div class="profile-card">
-                    <div class="card-title">
+                <!-- Profile card -->
+                <div class="bg-brand-cream border-2 border-brand-slate rounded-[6px] flex-1 min-w-0 overflow-hidden">
+                    <div class="font-jura text-base font-bold text-brand-gold text-center py-[0.6rem] px-4">
                         {{ profile.name or profile.username }}
                         {% if profile.pronouns %} · {{ profile.pronouns }}{% endif %}
                         {% if profile.age %}, {{ profile.age }}{% endif %}
                         {% if profile.year %} · {{ profile.year }}{% endif %}
-                         · <span {% if not profile.major %}class="card-field-empty"{% endif %}>{{ profile.major or "Major not listed" }}</span>
-                         · <span {% if not profile.height %}class="card-field-empty"{% endif %}>{{ profile.height or "Height not listed" }}</span>
+                         · <span {% if not profile.major %}class="italic opacity-50"{% endif %}>{{ profile.major or "Major not listed" }}</span>
+                         · <span {% if not profile.height %}class="italic opacity-50"{% endif %}>{{ profile.height or "Height not listed" }}</span>
                     </div>
 
                     {% if profile.compat_score %}
-                    <div class="compat-bar-wrap">
-                        <span class="compat-label">{{ profile.compat_score }} compatibility</span>
+                    <div class="px-4 pb-[0.55rem] text-center">
+                        <span class="font-jura text-[0.72rem] font-bold text-brand-gold">{{ profile.compat_score }} compatibility</span>
                     </div>
                     {% endif %}
 
                     {% if profile.photo_path %}
-                    <img class="card-photo" src="/static/{{ profile.photo_path }}" alt="{{ profile.name or profile.username }}">
+                    <img class="block w-full object-cover object-top aspect-[3/2.8]"
+                        src="/static/{{ profile.photo_path }}" alt="{{ profile.name or profile.username }}">
                     {% else %}
-                    <div class="card-photo card-photo-placeholder">
+                    <div class="w-full aspect-[3/2.8] bg-brand-slate flex items-center justify-center text-[5rem] text-brand-blue">
                         <i class="fa-solid fa-user"></i>
                     </div>
                     {% endif %}
 
                     {% set traits = profile.about.split(',') | map('trim') | select | list if profile.about else [] %}
-                    <div class="card-traits">
+                    <div class="flex flex-row py-[0.65rem] px-4 pb-[0.8rem] gap-2">
                         {% if traits %}
                         {% set half = ((traits | length) / 2) | round(0, 'ceil') | int %}
-                        <div class="traits-col">
-                            {% for t in traits[:half] %}<span>{{ t }}</span>{% endfor %}
+                        <div class="flex-1 flex flex-col gap-1">
+                            {% for t in traits[:half] %}<span class="font-inter text-[0.82rem] font-medium text-brand-gold">{{ t }}</span>{% endfor %}
                         </div>
-                        <div class="traits-col">
-                            {% for t in traits[half:] %}<span>{{ t }}</span>{% endfor %}
+                        <div class="flex-1 flex flex-col gap-1">
+                            {% for t in traits[half:] %}<span class="font-inter text-[0.82rem] font-medium text-brand-gold">{{ t }}</span>{% endfor %}
                         </div>
                         {% else %}
-                        <span class="card-field-empty">No traits listed</span>
+                        <span class="font-inter text-[0.82rem] font-medium text-brand-gold italic opacity-50">No traits listed</span>
                         {% endif %}
                     </div>
                 </div>
 
-                <form id="discover-accept" method="post" action="/discover" class="side-panel accept-panel">
+                <!-- Accept -->
+                <form id="discover-accept" method="post" action="/discover" class="w-[85px] shrink-0 flex items-stretch rounded-[6px]">
                     <input type="hidden" name="action" value="accept">
                     <input type="hidden" name="swiped_id" value="{{ profile.id }}">
-                    <button type="submit" title="Accept (right arrow key)">
-                        <i class="fa-solid fa-arrow-right"></i>
+                    <button type="submit" title="Accept (right arrow key)"
+                        class="flex-1 border-none rounded-r-[6px] cursor-pointer flex flex-col items-center justify-center gap-2 font-inter text-[0.75rem] font-semibold text-brand-blue p-2 transition-[filter] duration-150 hover:brightness-90 bg-brand-green w-full">
+                        <i class="fa-solid fa-arrow-right text-[1.1rem]"></i>
                         <span>Accept</span>
                     </button>
                 </form>
@@ -87,10 +91,13 @@
             </div>
 
             {% else %}
-            <div class="no-profiles">
-                <i class="fa-solid fa-heart-crack no-profiles-icon"></i>
-                <p class="no-profiles-msg">You've seen everyone for now.</p>
-                <a href="/discover" class="btn btn-primary">Check Again</a>
+            <div class="bg-brand-cream border-2 border-brand-slate rounded-[6px] py-10 px-8 text-center flex flex-col items-center gap-4 max-w-[300px] w-full">
+                <i class="fa-solid fa-heart-crack text-[2.5rem] text-brand-gold"></i>
+                <p class="font-jura text-base font-semibold text-brand-blue">You've seen everyone for now.</p>
+                <a href="/discover"
+                    class="inline-block py-[0.65rem] px-[1.8rem] rounded font-bold text-base no-underline cursor-pointer border-2 border-transparent bg-brand-blue text-brand-cream hover:opacity-85 transition-opacity duration-150">
+                    Check Again
+                </a>
             </div>
             {% endif %}
 

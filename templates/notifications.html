@@ -1,68 +1,77 @@
 {% extends "base.html" %}
 
 {% block title %}Notifications — Kent Date Enough{% endblock %}
-{% block body_class %}discover{% endblock %}
-
-{% block head %}
-<link rel="stylesheet" href="/static/css/discover.css">
-<link rel="stylesheet" href="/static/css/notifications.css">
-{% endblock %}
+{% block body_class %}overflow-hidden{% endblock %}
 
 {% block layout %}
-<div class="discover-shell">
+<div class="w-screen h-screen overflow-hidden relative">
 
     {% with active_nav = 'notifications' %}{% include '_nav.html' %}{% endwith %}
 
-    <main class="discover-main">
+    <main class="w-full h-full relative flex items-center justify-center">
         {% include '_bolt_bg.html' %}
 
-        <div class="notif-page">
-            <h1 class="card-page-title">Notifications</h1>
+        <div class="relative z-10 w-[min(90vw,600px)] max-h-[85vh] overflow-y-auto flex flex-col gap-6 bg-brand-slate rounded-2xl py-7 px-8">
 
-            <div class="notif-list">
+            <h1 class="font-jura text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-brand-blue m-0">Notifications</h1>
+
+            <div class="flex flex-col gap-4">
                 {% for n in notifs %}
 
                 {% if n.type == 'match' %}
-                <div class="notif-card">
-                    <i class="fa-solid fa-circle-info notif-icon"></i>
-                    <div class="notif-body">
-                        <p class="notif-heading">You have a new match</p>
-                        <p class="notif-desc">You matched with {{ n.name }}. Start a conversation!</p>
-                        <div class="notif-actions">
-                            <a href="/chats?match={{ n.match_id }}" class="notif-btn">Chat</a>
+                <div class="bg-white rounded-[10px] py-5 px-6 flex gap-4 items-start">
+                    <i class="fa-solid fa-circle-info text-brand-blue text-base mt-[0.15rem] shrink-0"></i>
+                    <div class="flex flex-col gap-[0.35rem]">
+                        <p class="font-inter text-[0.95rem] font-bold text-black">You have a new match</p>
+                        <p class="font-inter text-[0.88rem] text-black leading-[1.45]">You matched with {{ n.name }}. Start a conversation!</p>
+                        <div class="flex items-center gap-3 mt-2">
+                            <a href="/chats?match={{ n.match_id }}"
+                                class="inline-block mt-0 py-[0.4rem] px-4 bg-brand-blue text-brand-cream font-inter text-[0.85rem] font-semibold rounded-[6px] no-underline hover:opacity-85 transition-opacity duration-150">
+                                Chat
+                            </a>
                             <form method="post" action="/notifications/dismiss">
                                 <input type="hidden" name="match_id" value="{{ n.match_id }}">
-                                <button type="submit" class="notif-dismiss">Dismiss</button>
+                                <button type="submit"
+                                    class="bg-transparent border-none font-inter text-[0.85rem] text-brand-danger cursor-pointer p-0 hover:opacity-70 transition-opacity duration-150">
+                                    Dismiss
+                                </button>
                             </form>
                         </div>
                     </div>
                 </div>
 
                 {% elif n.type == 'message' %}
-                <div class="notif-card">
-                    <i class="fa-solid fa-envelope notif-icon"></i>
-                    <div class="notif-body">
-                        <p class="notif-heading">New message from {{ n.name }}</p>
-                        <p class="notif-desc">{{ n.count }} unread message{{ 's' if n.count != 1 else '' }}</p>
-                        <a href="/chats?match={{ n.match_id }}" class="notif-btn">Open Chat</a>
+                <div class="bg-white rounded-[10px] py-5 px-6 flex gap-4 items-start">
+                    <i class="fa-solid fa-envelope text-brand-blue text-base mt-[0.15rem] shrink-0"></i>
+                    <div class="flex flex-col gap-[0.35rem]">
+                        <p class="font-inter text-[0.95rem] font-bold text-black">New message from {{ n.name }}</p>
+                        <p class="font-inter text-[0.88rem] text-black leading-[1.45]">{{ n.count }} unread message{{ 's' if n.count != 1 else '' }}</p>
+                        <a href="/chats?match={{ n.match_id }}"
+                            class="inline-block mt-2 py-[0.4rem] px-4 bg-brand-blue text-brand-cream font-inter text-[0.85rem] font-semibold rounded-[6px] no-underline hover:opacity-85 transition-opacity duration-150">
+                            Open Chat
+                        </a>
                     </div>
                 </div>
 
                 {% elif n.type == 'profile' %}
-                <div class="notif-card">
-                    <i class="fa-solid fa-circle-info notif-icon"></i>
-                    <div class="notif-body">
-                        <p class="notif-heading">Update Profile</p>
-                        <p class="notif-desc">Complete your profile to get more matches. Make sure your profile has the most up to date information.</p>
-                        <a href="/profile" class="notif-btn">Update Profile</a>
+                <div class="bg-white rounded-[10px] py-5 px-6 flex gap-4 items-start">
+                    <i class="fa-solid fa-circle-info text-brand-blue text-base mt-[0.15rem] shrink-0"></i>
+                    <div class="flex flex-col gap-[0.35rem]">
+                        <p class="font-inter text-[0.95rem] font-bold text-black">Update Profile</p>
+                        <p class="font-inter text-[0.88rem] text-black leading-[1.45]">Complete your profile to get more matches. Make sure your profile has the most up to date information.</p>
+                        <a href="/profile"
+                            class="inline-block mt-2 py-[0.4rem] px-4 bg-brand-blue text-brand-cream font-inter text-[0.85rem] font-semibold rounded-[6px] no-underline hover:opacity-85 transition-opacity duration-150">
+                            Update Profile
+                        </a>
                     </div>
                 </div>
                 {% endif %}
 
                 {% else %}
-                <p class="notif-empty">You're all caught up!</p>
+                <p class="font-inter text-[0.95rem] text-brand-blue text-center py-8">You're all caught up!</p>
                 {% endfor %}
             </div>
+
         </div>
     </main>
 

@@ -1,38 +1,57 @@
-<button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false">
+<button class="fixed top-4 right-4 z-[200] bg-brand-blue text-brand-cream border-none rounded-full w-10 h-10 text-base cursor-pointer flex items-center justify-center shadow-[0_2px_8px_rgba(2,54,114,0.4)] transition-colors duration-150 hover:bg-brand-yellow hover:text-brand-blue"
+    id="nav-toggle" aria-label="Open menu" aria-expanded="false">
     <i class="fa-solid fa-bars"></i>
-    {% if notif_count %}<span class="nav-badge">{{ notif_count }}</span>{% endif %}
+    {% if notif_count %}
+    <span class="absolute -top-1 -right-1 bg-brand-yellow text-brand-blue font-inter text-[0.65rem] font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-[3px] leading-none">{{ notif_count }}</span>
+    {% endif %}
 </button>
 
-<div class="nav-overlay" id="nav-overlay"></div>
-<nav class="sidebar" id="sidebar" aria-hidden="true">
-    <button class="nav-close" id="nav-close" aria-label="Close menu">
+<div class="hidden fixed inset-0 z-[299] bg-[rgba(2,54,114,0.3)]" id="nav-overlay"></div>
+
+<nav class="fixed top-0 right-0 bottom-0 w-[200px] z-[300] bg-brand-blue flex flex-col pt-4 translate-x-full transition-transform duration-[250ms] [transition-timing-function:ease] shadow-[-4px_0_20px_rgba(2,54,114,0.4)]"
+    id="sidebar" aria-hidden="true">
+
+    <button class="self-end mr-4 mb-2 bg-transparent border-none text-brand-cream text-[1.1rem] cursor-pointer opacity-60 hover:opacity-100 transition-opacity duration-150"
+        id="nav-close" aria-label="Close menu">
         <i class="fa-solid fa-xmark"></i>
     </button>
-    <a href="/discover" class="sidebar-item {% if active_nav == 'discover' %}sidebar-active{% endif %}">
-        <i class="fa-solid fa-compass sidebar-icon"></i> Discover
+
+    <a href="/discover"
+        class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-cream no-underline border-l-[3px] border-l-transparent transition-colors duration-150 hover:bg-[rgba(254,234,209,0.08)] {% if active_nav == 'discover' %}border-l-brand-yellow bg-[rgba(234,171,0,0.12)]{% endif %}">
+        <i class="fa-solid fa-compass w-4 text-center shrink-0"></i> Discover
     </a>
-    <a href="/profile" class="sidebar-item {% if active_nav == 'profile' %}sidebar-active{% endif %}">
-        <i class="fa-solid fa-user sidebar-icon"></i> My Profile
+    <a href="/profile"
+        class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-cream no-underline border-l-[3px] border-l-transparent transition-colors duration-150 hover:bg-[rgba(254,234,209,0.08)] {% if active_nav == 'profile' %}border-l-brand-yellow bg-[rgba(234,171,0,0.12)]{% endif %}">
+        <i class="fa-solid fa-user w-4 text-center shrink-0"></i> My Profile
     </a>
-    <a href="/chats" class="sidebar-item {% if active_nav == 'chats' %}sidebar-active{% endif %}">
-        <i class="fa-solid fa-message sidebar-icon"></i> Chats
+    <a href="/chats"
+        class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-cream no-underline border-l-[3px] border-l-transparent transition-colors duration-150 hover:bg-[rgba(254,234,209,0.08)] {% if active_nav == 'chats' %}border-l-brand-yellow bg-[rgba(234,171,0,0.12)]{% endif %}">
+        <i class="fa-solid fa-message w-4 text-center shrink-0"></i> Chats
     </a>
-    <a href="/notifications" class="sidebar-item {% if active_nav == 'notifications' %}sidebar-active{% endif %}">
-        <i class="fa-solid fa-bell sidebar-icon"></i> Notifications
-        {% if notif_count %}<span class="sidebar-badge">{{ notif_count }}</span>{% endif %}
+    <a href="/notifications"
+        class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-cream no-underline border-l-[3px] border-l-transparent transition-colors duration-150 hover:bg-[rgba(254,234,209,0.08)] {% if active_nav == 'notifications' %}border-l-brand-yellow bg-[rgba(234,171,0,0.12)]{% endif %}">
+        <i class="fa-solid fa-bell w-4 text-center shrink-0"></i> Notifications
+        {% if notif_count %}
+        <span class="ml-auto bg-brand-yellow text-brand-blue font-inter text-[0.7rem] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">{{ notif_count }}</span>
+        {% endif %}
     </a>
-    <a href="/schedule" class="sidebar-item {% if active_nav == 'schedule' %}sidebar-active{% endif %}">
-        <i class="fa-solid fa-calendar-days sidebar-icon"></i> Schedule
+    <a href="/schedule"
+        class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-cream no-underline border-l-[3px] border-l-transparent transition-colors duration-150 hover:bg-[rgba(254,234,209,0.08)] {% if active_nav == 'schedule' %}border-l-brand-yellow bg-[rgba(234,171,0,0.12)]{% endif %}">
+        <i class="fa-solid fa-calendar-days w-4 text-center shrink-0"></i> Schedule
     </a>
-    <a href="/testimonials" class="sidebar-item {% if active_nav == 'testimonials' %}sidebar-active{% endif %}">
-        <i class="fa-solid fa-star sidebar-icon"></i> Testimonials
+    <a href="/testimonials"
+        class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-cream no-underline border-l-[3px] border-l-transparent transition-colors duration-150 hover:bg-[rgba(254,234,209,0.08)] {% if active_nav == 'testimonials' %}border-l-brand-yellow bg-[rgba(234,171,0,0.12)]{% endif %}">
+        <i class="fa-solid fa-star w-4 text-center shrink-0"></i> Testimonials
     </a>
-    <a href="/settings" class="sidebar-item {% if active_nav == 'settings' %}sidebar-active{% endif %}">
-        <i class="fa-solid fa-gear sidebar-icon"></i> Settings
+    <a href="/settings"
+        class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-cream no-underline border-l-[3px] border-l-transparent transition-colors duration-150 hover:bg-[rgba(254,234,209,0.08)] {% if active_nav == 'settings' %}border-l-brand-yellow bg-[rgba(234,171,0,0.12)]{% endif %}">
+        <i class="fa-solid fa-gear w-4 text-center shrink-0"></i> Settings
     </a>
-    <a href="/logout" class="sidebar-item sidebar-logout">
-        <i class="fa-solid fa-right-from-bracket sidebar-icon"></i> Logout
+    <a href="/logout"
+        class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-danger no-underline border-l-[3px] border-l-transparent transition-colors duration-150 mt-auto border-t border-t-[rgba(254,234,209,0.1)] hover:bg-[rgba(251,45,48,0.12)]">
+        <i class="fa-solid fa-right-from-bracket w-4 text-center shrink-0"></i> Logout
     </a>
+
 </nav>
 
 <script>
