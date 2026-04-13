@@ -51,11 +51,12 @@
             <h1 class="mb-4 mt-[3%] font-jura text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-brand-blue">Account Information</h1>
             <h3 class="font-inter font-bold text-brand-blue">Username: {%if user.username %}{{user.username}}{%endif%}</h3>
             <h3 class="font-inter font-bold text-brand-blue">Password</h3>
-            <button class="inline-block py-[0.65rem] px-[1.8rem] rounded-full font-bold text-sm cursor-pointer border-2 bg-brand-danger text-white border-brand-danger w-fit hover:opacity-85 transition-opacity duration-150">
-                Reset Password
-            </button>
+            <a class="inline-block py-[0.65rem] px-[1.8rem] rounded-full font-bold text-sm cursor-pointer border-2 bg-brand-danger text-white border-brand-danger w-fit hover:opacity-85 transition-opacity duration-150"
+                    href="/reset-password">
+                    Reset Password
+            </a>
             <h3 class="font-inter font-bold text-brand-blue">Created at: {%if user.created_at %}{{user.created_at}}{% endif %}</h3>
-            <button class="inline-block py-[0.65rem] px-[1.8rem] rounded-full font-bold text-base cursor-pointer border-2 bg-brand-danger text-white border-brand-danger hover:opacity-85 transition-opacity duration-150 mt-auto mb-[5%]">
+            <button class="inline-block py-[0.65re  m] px-[1.8rem] rounded-full font-bold text-base cursor-pointer border-2 bg-brand-danger text-white border-brand-danger hover:opacity-85 transition-opacity duration-150 mt-auto mb-[5%]">
                 Delete Account
             </button>
         </div>
