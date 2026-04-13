@@ -39,9 +39,30 @@
                     <label for="genderSelectOther" class="font-inter text-sm cursor-pointer">Other</label>
                 </div>
 
+                {% if error %}
+                <p class="font-inter text-[0.85rem] text-brand-danger">{{ error }}</p>
+                {% endif %}
+
                 <input type="submit" value="Submit"
                     class="inline-block py-[0.65rem] px-[1.8rem] rounded-full font-bold text-base cursor-pointer border-2 border-transparent bg-brand-blue text-brand-yellow w-fit hover:opacity-85 transition-opacity duration-150">
             </form>
+
+<script>
+document.querySelector('form[name="matchSettings"]').addEventListener('submit', function (e) {
+    var genders = ['genderSelectMen','genderSelectWomen','genderSelectNB','genderSelectOther'];
+    var any = genders.some(function (id) { return document.getElementById(id).checked; });
+    if (!any) {
+        e.preventDefault();
+        var existing = this.querySelector('.gender-error');
+        if (!existing) {
+            var p = document.createElement('p');
+            p.className = 'font-inter text-[0.85rem] text-brand-danger gender-error';
+            p.textContent = 'Select at least one gender to match with.';
+            this.querySelector('input[type="submit"]').before(p);
+        }
+    }
+});
+</script>
         </div>
     </div>
 

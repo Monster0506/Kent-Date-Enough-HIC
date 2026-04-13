@@ -463,12 +463,22 @@ def settings_post(req):
     if not user_id:
         return redirect("/login")
 
-    # defaults to 0 since unselected check is not passed
     match_all_majors = 1 if req.form.get("majorsMatchSelection") == ["all"] else 0
     match_men = 1 if req.form.get("genderSelectMen") else 0
     match_women = 1 if req.form.get("genderSelectWomen") else 0
     match_nb = 1 if req.form.get("genderSelectNB") else 0
     match_other = 1 if req.form.get("genderSelectOther") else 0
+
+    if not (match_men or match_women or match_nb or match_other):
+        settings = get_user_settings(user_id)
+        user = _get_user(user_id)
+        return app.render(
+            "settings.html",
+            notif_count=_nc(user_id),
+            settings=settings,
+            user=user,
+            error="Select at least one gender to match with.",
+        )
 
     update_user_settings(
         user_id, match_all_majors, match_men, match_women, match_nb, match_other
