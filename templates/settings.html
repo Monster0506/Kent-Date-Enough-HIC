@@ -53,7 +53,7 @@
             <h1 class="card-header">Account Information</h1>
             <h3>Username: {%if user.username %}{{user.username}}{%endif%}</h3>
             <h3>Password</h3>
-            <button class="btn btn-danger-sm">Reset Password</button>
+                <a class="btn btn-danger-sm" href="/reset-password">Reset Password</a>
 
             <h3>Created at: {%if user.created_at %}{{user.created_at}}{% endif %}</h3>
             <button class="btn btn-danger-lg btn-delete-acc">Delete Account</button>

@@ -24,6 +24,8 @@ from db import (
     remove_course,
     set_match_icebreaker,
     get_match_icebreaker,
+    hash_password,
+    reset_password,
 )
 from scraper import lookup_crns
 from icebreaker import generate_icebreaker
@@ -553,7 +555,36 @@ def logout(req):
         headers=resp.headers + (clear_session_header(),),
         body=resp.body,
     )
+    
+@app.get("/reset-password")
+def reset_password_get(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    return app.render("reset_password.html", error=None, success=False)
 
+
+@app.post("/reset-password")
+def reset_password_post(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+
+    new_pass = req.form_value("new_password") or ""
+    confirm  = req.form_value("confirm_password") or ""
+
+    if new_pass != confirm:
+        return app.render("reset_password.html", error="Passwords do not match.", success=False)
+    if len(new_pass) < 6:
+        return app.render("reset_password.html", error="Password must be at least 6 characters.", success=False)
+
+    with get_conn() as conn:
+        conn.execute(
+            "UPDATE users SET password_hash = ? WHERE id = ?",
+            (hash_password(new_pass), user_id),
+        )
+
+    return app.render("reset_password.html", error=None, success=True)
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8000)
