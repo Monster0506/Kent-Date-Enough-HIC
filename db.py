@@ -430,6 +430,11 @@ def upsert_testimonial(user_id: int, body: str) -> None:
             )
 
 
+def delete_testimonial(user_id: int) -> None:
+    with get_conn() as conn:
+        conn.execute("DELETE FROM testimonials WHERE user_id = ?", (user_id,))
+
+
 def verify_password(password: str, stored: str) -> bool:
     salt_hex, key_hex = stored.split(":", 1)
     salt = bytes.fromhex(salt_hex)

@@ -20,6 +20,7 @@ from db import (
     get_user_settings,
     get_user_testimonial,
     upsert_testimonial,
+    delete_testimonial,
     save_course,
     get_schedule,
     remove_course,
@@ -456,6 +457,15 @@ def testimonials_get(req):
         error=None,
         notif_count=_nc(user_id),
     )
+
+
+@app.post("/testimonials/delete")
+def testimonials_delete(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    delete_testimonial(user_id)
+    return redirect("/testimonials")
 
 
 @app.post("/testimonials")
