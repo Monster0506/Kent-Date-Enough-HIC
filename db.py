@@ -243,6 +243,14 @@ def get_match_icebreaker(match_id: int) -> str:
     return row["icebreaker"] or "" if row else ""
 
 
+def clear_match_icebreaker(match_id: int) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "UPDATE matches SET icebreaker = NULL WHERE id = ?",
+            (match_id,),
+        )
+
+
 def get_matches(user_id: int) -> list[dict]:
     with get_conn() as conn:
         rows = conn.execute(
@@ -257,6 +265,14 @@ def get_matches(user_id: int) -> list[dict]:
             (user_id, user_id, user_id),
         ).fetchall()
     return [dict(r) for r in rows]
+
+
+def get_match_user_ids(match_id: int) -> tuple[int, int]:
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT user_a_id, user_b_id FROM matches WHERE id = ?", (match_id,)
+        ).fetchone()
+    return (row["user_a_id"], row["user_b_id"]) if row else (0, 0)
 
 
 def get_messages(match_id: int) -> list[dict]:

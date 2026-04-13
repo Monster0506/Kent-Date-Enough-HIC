@@ -88,7 +88,16 @@
                         {% if icebreaker %}
                         <div class="rounded-[14px] py-[0.85rem] px-[1.1rem] mb-2 shrink-0 text-brand-cream" id="icebreaker-card"
                             style="background: linear-gradient(135deg, #023672 0%, #1a5fa8 100%);">
-                            <span class="icebreaker-label">✦ Icebreaker</span>
+                            <div class="flex items-center justify-between mb-[0.35rem]">
+                                <span class="icebreaker-label" style="margin-bottom:0;">✦ Icebreaker</span>
+                                <form method="post" action="/chats/regenerate" style="margin:0;">
+                                    <input type="hidden" name="match_id" value="{{ active.id }}">
+                                    <button type="submit" title="Generate a new icebreaker"
+                                        style="background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,0.6);font-size:0.75rem;padding:0;font-family:'Inter',sans-serif;">
+                                        ↻ new
+                                    </button>
+                                </form>
+                            </div>
                             <p class="icebreaker-body">{{ icebreaker }}</p>
                         </div>
                         {% else %}

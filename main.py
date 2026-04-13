@@ -25,6 +25,8 @@ from db import (
     remove_course,
     set_match_icebreaker,
     get_match_icebreaker,
+    clear_match_icebreaker,
+    get_match_user_ids,
 )
 from scraper import lookup_crns
 from icebreaker import generate_icebreaker
@@ -375,6 +377,21 @@ def chats_get(req):
         icebreaker=icebreaker,
         notif_count=_nc(user_id),
     )
+
+
+@app.post("/chats/regenerate")
+def chats_regenerate(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    match_id = int(req.form_value("match_id") or 0)
+    if match_id:
+        a_id, b_id = get_match_user_ids(match_id)
+        if user_id in (a_id, b_id):
+            other_id = b_id if user_id == a_id else a_id
+            clear_match_icebreaker(match_id)
+            _make_icebreaker(match_id, user_id, other_id)
+    return redirect(f"/chats?match={match_id}")
 
 
 @app.post("/chats")
