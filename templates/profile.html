@@ -62,7 +62,30 @@
                             {% endfor %}
                         </select>
                         <input type="text" name="height" placeholder="Height (e.g. 5'10&quot;)" value="{{ user.height or '' }}"
+                            list="height-options"
                             class="w-full py-[1.2rem] px-[1.5rem] border-none rounded-xl bg-white font-inter text-[1.1rem] text-black outline-none focus:shadow-[0_0_0_2px_#023672] placeholder:text-brand-gray">
+                        <datalist id="height-options">
+                            <option value="4'10&quot;">
+                            <option value="4'11&quot;">
+                            <option value="5'0&quot;">
+                            <option value="5'1&quot;">
+                            <option value="5'2&quot;">
+                            <option value="5'3&quot;">
+                            <option value="5'4&quot;">
+                            <option value="5'5&quot;">
+                            <option value="5'6&quot;">
+                            <option value="5'7&quot;">
+                            <option value="5'8&quot;">
+                            <option value="5'9&quot;">
+                            <option value="5'10&quot;">
+                            <option value="5'11&quot;">
+                            <option value="6'0&quot;">
+                            <option value="6'1&quot;">
+                            <option value="6'2&quot;">
+                            <option value="6'3&quot;">
+                            <option value="6'4&quot;">
+                            <option value="6'5&quot;">
+                        </datalist>
                         <input type="number" name="age" placeholder="Age" value="{{ user.age or '' }}" min="18" required
                             class="w-full py-[1.2rem] px-[1.5rem] border-none rounded-xl bg-white font-inter text-[1.1rem] text-black outline-none focus:shadow-[0_0_0_2px_#023672] placeholder:text-brand-gray">
                     </div>
