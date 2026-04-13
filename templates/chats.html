@@ -163,7 +163,13 @@ if (el) el.scrollTop = el.scrollHeight;
             '<span class="icebreaker-label">\u2736 Icebreaker</span>' +
             '<p class="icebreaker-body">' + data.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>';
     };
-    es.onerror = function () { es.close(); };
+    es.onerror = function () {
+        es.close();
+        card.classList.remove('icebreaker-loading');
+        card.innerHTML =
+            '<span class="icebreaker-label">\u2736 Icebreaker</span>' +
+            '<p class="icebreaker-body" style="opacity:0.7;font-style:italic;">Could not generate icebreaker. Say hello!</p>';
+    };
 })();
 </script>
 {% endblock %}
