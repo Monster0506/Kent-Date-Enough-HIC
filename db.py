@@ -192,12 +192,14 @@ def get_next_profile(user_id: int, settings: dict | None = None) -> dict | None:
             ORDER BY ({score_sql}) DESC, created_at ASC
             LIMIT 1
             """,
-            params + score_params + score_params,
+            score_params + params + score_params,
         ).fetchone()
     return dict(row) if row else None
 
 
 def record_swipe(swiper_id: int, swiped_id: int, direction: str) -> int:
+    if swiper_id == swiped_id:
+        return 0
     with get_conn() as conn:
         conn.execute(
             "INSERT OR IGNORE INTO swipes (swiper_id, swiped_id, direction) VALUES (?, ?, ?)",
