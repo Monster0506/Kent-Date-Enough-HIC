@@ -2,4 +2,4 @@ __pycache__/
 .venv/
 *.db
 profile_images/
-.gstack/
+.env
