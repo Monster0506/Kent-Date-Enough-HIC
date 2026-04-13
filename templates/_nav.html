@@ -47,10 +47,24 @@
         class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-cream no-underline border-l-[3px] border-l-transparent transition-colors duration-150 hover:bg-[rgba(254,234,209,0.08)] {% if active_nav == 'settings' %}border-l-brand-yellow bg-[rgba(234,171,0,0.12)]{% endif %}">
         <i class="fa-solid fa-gear w-4 text-center shrink-0"></i> Settings
     </a>
-    <a href="/logout"
-        class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-danger no-underline border-l-[3px] border-l-transparent transition-colors duration-150 mt-auto border-t border-t-[rgba(254,234,209,0.1)] hover:bg-[rgba(251,45,48,0.12)]">
+    <button id="logout-btn"
+        class="flex items-center gap-3 py-[0.85rem] px-5 font-inter text-[0.95rem] font-medium text-brand-danger no-underline border-l-[3px] border-l-transparent transition-colors duration-150 mt-auto border-t border-t-[rgba(254,234,209,0.1)] hover:bg-[rgba(251,45,48,0.12)] bg-transparent border-none w-full cursor-pointer">
         <i class="fa-solid fa-right-from-bracket w-4 text-center shrink-0"></i> Logout
-    </a>
+    </button>
+
+    <div id="logout-confirm" class="hidden absolute bottom-0 left-0 right-0 bg-brand-blue border-t border-t-brand-danger p-4 flex flex-col gap-2">
+        <p class="font-inter text-[0.85rem] text-brand-cream m-0">Log out?</p>
+        <div class="flex gap-2">
+            <a href="/logout"
+                class="flex-1 text-center py-[0.4rem] rounded font-inter text-[0.85rem] font-bold bg-brand-danger text-white no-underline hover:opacity-85 transition-opacity duration-150">
+                Yes, log out
+            </a>
+            <button id="logout-cancel"
+                class="flex-1 py-[0.4rem] rounded font-inter text-[0.85rem] font-bold bg-transparent border border-brand-cream text-brand-cream cursor-pointer hover:opacity-85 transition-opacity duration-150">
+                Cancel
+            </button>
+        </div>
+    </div>
 
 </nav>
 
@@ -72,6 +86,8 @@
         overlay.classList.remove('overlay-active');
         toggle.setAttribute('aria-expanded', 'false');
         sidebar.setAttribute('aria-hidden', 'true');
+        var confirm = document.getElementById('logout-confirm');
+        if (confirm) confirm.classList.add('hidden');
     }
 
     toggle.addEventListener('click', openNav);
@@ -79,6 +95,16 @@
     overlay.addEventListener('click', closeNav);
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeNav();
+    });
+
+    var logoutBtn    = document.getElementById('logout-btn');
+    var logoutConfirm = document.getElementById('logout-confirm');
+    var logoutCancel  = document.getElementById('logout-cancel');
+    if (logoutBtn) logoutBtn.addEventListener('click', function () {
+        logoutConfirm.classList.remove('hidden');
+    });
+    if (logoutCancel) logoutCancel.addEventListener('click', function () {
+        logoutConfirm.classList.add('hidden');
     });
 })();
 </script>
