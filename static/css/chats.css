@@ -193,6 +193,33 @@
 
 .chats-input-row button:hover { opacity: 0.85; }
 
+.icebreaker-card {
+    background: linear-gradient(135deg, var(--dark-blue) 0%, #1a5fa8 100%);
+    color: var(--light-yellow);
+    border-radius: 14px;
+    padding: 0.85rem 1.1rem;
+    margin-bottom: 0.5rem;
+    flex-shrink: 0;
+}
+
+.icebreaker-label {
+    font-family: 'Jura', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    display: block;
+    margin-bottom: 0.35rem;
+}
+
+.icebreaker-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
 .chats-no-match {
     flex: 1;
     display: flex;

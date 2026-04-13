@@ -43,12 +43,18 @@
                     <div class="chats-convo-header">{{ active.name or active.username }}</div>
 
                     <div class="chats-messages" id="messages">
+                        {% if icebreaker %}
+                        <div class="icebreaker-card">
+                            <span class="icebreaker-label">✦ Icebreaker</span>
+                            <p class="icebreaker-body">{{ icebreaker }}</p>
+                        </div>
+                        {% endif %}
                         {% for msg in messages %}
                         <div class="bubble-wrap {% if msg.sender_id == user_id %}bubble-mine{% else %}bubble-theirs{% endif %}">
                             <div class="bubble">{{ msg.body }}</div>
                         </div>
                         {% else %}
-                        <p class="chats-no-messages">Say hello!</p>
+                        {% if not icebreaker %}<p class="chats-no-messages">Say hello!</p>{% endif %}
                         {% endfor %}
                     </div>
 

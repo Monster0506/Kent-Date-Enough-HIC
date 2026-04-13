@@ -22,8 +22,11 @@ from db import (
     save_course,
     get_schedule,
     remove_course,
+    set_match_icebreaker,
+    get_match_icebreaker,
 )
 from scraper import lookup_crns
+from icebreaker import generate_icebreaker
 from kindling import Application
 from kindling.reactive import on, signal
 from urllib.parse import quote as _url_quote
@@ -260,6 +263,24 @@ def discover_get(req):
     )
 
 
+def _make_icebreaker(match_id: int, user_a_id: int, user_b_id: int):
+    import threading
+
+    def _run():
+        try:
+            ua = _get_user(user_a_id)
+            ub = _get_user(user_b_id)
+            sa = get_schedule(user_a_id)
+            sb = get_schedule(user_b_id)
+            text = generate_icebreaker(ua, ub, sa, sb)
+            if text:
+                set_match_icebreaker(match_id, text)
+        except Exception as exc:
+            print(f"[icebreaker] error: {exc}")
+
+    threading.Thread(target=_run, daemon=True).start()
+
+
 @app.post("/discover")
 def discover_post(req):
     user_id = get_session(req)
@@ -270,9 +291,10 @@ def discover_post(req):
     toast = ""
     if swiped_id:
         if action == "accept":
-            matched = record_swipe(user_id, swiped_id, "right")
-            if matched:
+            match_id = record_swipe(user_id, swiped_id, "right")
+            if match_id:
                 toast = "It's a match!"
+                _make_icebreaker(match_id, user_id, swiped_id)
         elif action == "reject":
             record_swipe(user_id, swiped_id, "left")
     dest = "/discover?toast=" + _url_quote(toast, safe="") if toast else "/discover"
@@ -290,6 +312,7 @@ def chats_get(req):
         (m for m in matches if m["id"] == match_id), matches[0] if matches else None
     )
     messages = get_messages(active["id"]) if active else []
+    icebreaker = get_match_icebreaker(active["id"]) if active else ""
     if active:
         mark_messages_read(user_id, active["id"])
     return app.render(
@@ -298,6 +321,7 @@ def chats_get(req):
         active=active,
         messages=messages,
         user_id=user_id,
+        icebreaker=icebreaker,
         notif_count=_nc(user_id),
     )
 

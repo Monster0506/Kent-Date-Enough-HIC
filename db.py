@@ -108,6 +108,10 @@ def init_db() -> None:
         if "gender" not in cols:
             conn.execute("ALTER TABLE users ADD COLUMN gender TEXT")
 
+        match_cols = [r[1] for r in conn.execute("PRAGMA table_info(matches)").fetchall()]
+        if "icebreaker" not in match_cols:
+            conn.execute("ALTER TABLE matches ADD COLUMN icebreaker TEXT")
+
 
 def hash_password(password: str) -> str:
     salt = os.urandom(16)
@@ -159,7 +163,7 @@ def get_next_profile(user_id: int, settings: dict | None = None) -> dict | None:
     return dict(row) if row else None
 
 
-def record_swipe(swiper_id: int, swiped_id: int, direction: str) -> bool:
+def record_swipe(swiper_id: int, swiped_id: int, direction: str) -> int:
     with get_conn() as conn:
         conn.execute(
             "INSERT OR IGNORE INTO swipes (swiper_id, swiped_id, direction) VALUES (?, ?, ?)",
@@ -175,8 +179,24 @@ def record_swipe(swiper_id: int, swiped_id: int, direction: str) -> bool:
                     "INSERT INTO matches (user_a_id, user_b_id) VALUES (?, ?)",
                     (swiper_id, swiped_id),
                 )
-                return True
-    return False
+                return conn.execute("SELECT last_insert_rowid()").fetchone()[0]
+    return 0
+
+
+def set_match_icebreaker(match_id: int, text: str) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "UPDATE matches SET icebreaker = ? WHERE id = ?",
+            (text, match_id),
+        )
+
+
+def get_match_icebreaker(match_id: int) -> str:
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT icebreaker FROM matches WHERE id = ?", (match_id,)
+        ).fetchone()
+    return row["icebreaker"] or "" if row else ""
 
 
 def get_matches(user_id: int) -> list[dict]:
