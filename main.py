@@ -13,6 +13,7 @@ from db import (
     init_db,
     mark_messages_read,
     record_swipe,
+    delete_swipe,
     send_message,
     verify_password,
     update_user_settings,
@@ -270,8 +271,9 @@ def discover_get(req):
     settings = get_user_settings(user_id)
     profile = get_next_profile(user_id, settings)
     toast = req.query("toast") or ""
+    undo_id = int(req.query("undo") or 0)
     return app.render(
-        "discover.html", profile=profile, toast=toast, notif_count=_nc(user_id)
+        "discover.html", profile=profile, toast=toast, undo_id=undo_id, notif_count=_nc(user_id)
     )
 
 
@@ -334,8 +336,20 @@ def discover_post(req):
                 _make_icebreaker(match_id, user_id, swiped_id)
         elif action == "reject":
             record_swipe(user_id, swiped_id, "left")
+            return redirect("/discover?undo=" + str(swiped_id))
     dest = "/discover?toast=" + _url_quote(toast, safe="") if toast else "/discover"
     return redirect(dest)
+
+
+@app.post("/discover/undo")
+def discover_undo(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    swiped_id = int(req.form_value("swiped_id") or 0)
+    if swiped_id:
+        delete_swipe(user_id, swiped_id)
+    return redirect("/discover")
 
 
 @app.get("/chats")

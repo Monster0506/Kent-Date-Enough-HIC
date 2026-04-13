@@ -219,6 +219,14 @@ def record_swipe(swiper_id: int, swiped_id: int, direction: str) -> int:
     return 0
 
 
+def delete_swipe(swiper_id: int, swiped_id: int) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "DELETE FROM swipes WHERE swiper_id = ? AND swiped_id = ?",
+            (swiper_id, swiped_id),
+        )
+
+
 def set_match_icebreaker(match_id: int, text: str) -> None:
     with get_conn() as conn:
         conn.execute(

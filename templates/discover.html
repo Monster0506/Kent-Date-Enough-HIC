@@ -21,6 +21,17 @@
             </div>
             {% endif %}
 
+            {% if undo_id %}
+            <form method="post" action="/discover/undo" class="flex items-center gap-3 bg-brand-slate py-[0.5rem] px-5 rounded-[6px] animate-toast-in">
+                <input type="hidden" name="swiped_id" value="{{ undo_id }}">
+                <span class="font-inter text-[0.88rem] text-brand-blue">Rejected.</span>
+                <button type="submit"
+                    class="font-inter text-[0.88rem] font-bold text-brand-blue underline bg-transparent border-none cursor-pointer p-0">
+                    Undo
+                </button>
+            </form>
+            {% endif %}
+
             {% if profile %}
             <div class="flex flex-row items-stretch w-[min(90vw,780px)]">
 
