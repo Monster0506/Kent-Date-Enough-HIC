@@ -53,6 +53,7 @@ from db import (
     get_match_icebreaker,
     hash_password,
     reset_password,
+    delete_account,
 )
 from scraper import lookup_crns
 from icebreaker import generate_icebreaker
@@ -680,6 +681,21 @@ def reset_password_post(req):
         )
 
     return app.render("reset_password.html", error=None, success=True)
+
+@app.post("/delete-account")
+def delete_account_post(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+
+    delete_account(user_id)
+
+    resp = redirect("/signup")
+    return Response(
+        status=resp.status,
+        headers=resp.headers + (clear_session_header(),),
+        body=resp.body,
+    )
 
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=8000)

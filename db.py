@@ -496,3 +496,17 @@ def reset_password(username: str, new_password: str) -> bool:
             (hash_password(new_password), row["id"]),
         )
     return True
+
+def delete_account(user_id: int) -> None:
+    with get_conn() as conn:
+        conn.executescript(f"""
+            DELETE FROM message_reads     WHERE user_id   = {user_id};
+            DELETE FROM dismissed_matches WHERE user_id   = {user_id};
+            DELETE FROM user_schedules    WHERE user_id   = {user_id};
+            DELETE FROM user_settings     WHERE user_id   = {user_id};
+            DELETE FROM testimonials      WHERE user_id   = {user_id};
+            DELETE FROM swipes            WHERE swiper_id = {user_id} OR swiped_id = {user_id};
+            DELETE FROM messages          WHERE sender_id = {user_id};
+            DELETE FROM matches           WHERE user_a_id = {user_id} OR user_b_id = {user_id};
+            DELETE FROM users             WHERE id        = {user_id};
+        """)
