@@ -21,6 +21,9 @@
         <i class="fa-solid fa-bell sidebar-icon"></i> Notifications
         {% if notif_count %}<span class="sidebar-badge">{{ notif_count }}</span>{% endif %}
     </a>
+    <a href="/schedule" class="sidebar-item {% if active_nav == 'schedule' %}sidebar-active{% endif %}">
+        <i class="fa-solid fa-calendar-days sidebar-icon"></i> Schedule
+    </a>
     <a href="/testimonials" class="sidebar-item {% if active_nav == 'testimonials' %}sidebar-active{% endif %}">
         <i class="fa-solid fa-star sidebar-icon"></i> Testimonials
     </a>

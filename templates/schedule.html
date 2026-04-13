@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}My Schedule — Kent Date Enough{% endblock %}
+{% block body_class %}discover{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/discover.css">
+<link rel="stylesheet" href="/static/css/schedule.css">
+{% endblock %}
+
+{% block layout %}
+<div class="discover-shell">
+
+    {% with active_nav = 'schedule' %}{% include '_nav.html' %}{% endwith %}
+
+    <main class="discover-main">
+        {% include '_bolt_bg.html' %}
+
+        <div class="discover-center">
+            <h1 class="page-bolt-title">My Schedule</h1>
+
+            <div class="schedule-panel">
+
+                <form class="schedule-lookup-form" method="post" action="/schedule">
+                    <input type="hidden" name="action" value="lookup">
+                    <div class="schedule-input-row">
+                        <input
+                            type="text"
+                            name="crns"
+                            class="schedule-crn-input"
+                            placeholder="Enter CRNs separated by spaces or commas…"
+                            value="{{ crn_input }}"
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="btn btn-submit">Look Up</button>
+                    </div>
+                    {% if error %}<p class="schedule-error">{{ error }}</p>{% endif %}
+                </form>
+
+                {% if preview is not none %}
+                <div class="schedule-preview">
+                    <h2 class="schedule-section-title">Results</h2>
+
+                    {% if preview %}
+                    <form method="post" action="/schedule">
+                        <input type="hidden" name="action" value="save">
+                        <input type="hidden" name="courses_json" value="{{ preview | tojson }}">
+
+                        <table class="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th>CRN</th>
+                                    <th>Course</th>
+                                    <th>Title</th>
+                                    <th>Days</th>
+                                    <th>Time</th>
+                                    <th>Location</th>
+                                    <th>Instructor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in preview %}
+                                <tr>
+                                    <td>{{ c.crn }}</td>
+                                    <td>{{ c.subject }} {{ c.course_num }}</td>
+                                    <td>{{ c.name }}</td>
+                                    <td>{{ c.days }}</td>
+                                    <td>{{ c.time }}</td>
+                                    <td>{{ c.location }}</td>
+                                    <td>{{ c.instructor }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        {% if not_found %}
+                        <p class="schedule-not-found">
+                            CRN{{ 's' if not_found|length > 1 else '' }} not found:
+                            {{ not_found | join(', ') }}
+                        </p>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-submit schedule-save-btn">
+                            Add to My Schedule &#x2197;
+                        </button>
+                    </form>
+                    {% else %}
+                    <p class="schedule-empty">No courses found for those CRNs.</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="schedule-saved">
+                    <h2 class="schedule-section-title">Saved Schedule</h2>
+
+                    {% if schedule %}
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>CRN</th>
+                                <th>Course</th>
+                                <th>Title</th>
+                                <th>Days</th>
+                                <th>Time</th>
+                                <th>Location</th>
+                                <th>Instructor</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in schedule %}
+                            <tr>
+                                <td>{{ c.crn }}</td>
+                                <td>{{ c.subject }} {{ c.course_num }}</td>
+                                <td>{{ c.name }}</td>
+                                <td>{{ c.days }}</td>
+                                <td>{{ c.time }}</td>
+                                <td>{{ c.location }}</td>
+                                <td>{{ c.instructor }}</td>
+                                <td>
+                                    <form method="post" action="/schedule" class="schedule-remove-form">
+                                        <input type="hidden" name="action" value="remove">
+                                        <input type="hidden" name="crn" value="{{ c.crn }}">
+                                        <button type="submit" class="schedule-remove-btn" title="Remove">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="schedule-empty">No courses saved yet. Look up some CRNs above.</p>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+</div>
+{% endblock %}

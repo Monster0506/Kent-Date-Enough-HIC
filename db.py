@@ -78,6 +78,21 @@ def init_db() -> None:
                 PRIMARY KEY (user_id, match_id)
             );
 
+            CREATE TABLE IF NOT EXISTS user_schedules (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id     INTEGER NOT NULL REFERENCES users(id),
+                crn         TEXT    NOT NULL,
+                subject     TEXT,
+                course_num  TEXT,
+                name        TEXT,
+                days        TEXT,
+                time        TEXT,
+                location    TEXT,
+                instructor  TEXT,
+                term        TEXT,
+                UNIQUE(user_id, crn)
+            );
+
             CREATE TABLE IF NOT EXISTS user_settings(
                 id                  INTEGER     PRIMARY KEY AUTOINCREMENT,
                 user_id             INTEGER     NOT NULL UNIQUE REFERENCES users(id),
@@ -273,6 +288,42 @@ def get_notifications(user_id: int) -> list[dict]:
             notifs.append({"type": "profile"})
 
     return notifs
+
+
+def save_course(user_id: int, course: dict) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            """INSERT INTO user_schedules
+               (user_id, crn, subject, course_num, name, days, time, location, instructor, term)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(user_id, crn) DO UPDATE SET
+               subject=excluded.subject, course_num=excluded.course_num, name=excluded.name,
+               days=excluded.days, time=excluded.time, location=excluded.location,
+               instructor=excluded.instructor, term=excluded.term""",
+            (
+                user_id, course["crn"], course["subject"], course["course_num"],
+                course["name"], course["days"], course["time"],
+                course["location"], course["instructor"], course["term"],
+            ),
+        )
+
+
+def get_schedule(user_id: int) -> list[dict]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            """SELECT crn, subject, course_num, name, days, time, location, instructor, term
+               FROM user_schedules WHERE user_id = ? ORDER BY days, time""",
+            (user_id,),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def remove_course(user_id: int, crn: str) -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "DELETE FROM user_schedules WHERE user_id = ? AND crn = ?",
+            (user_id, crn),
+        )
 
 
 def get_user_testimonial(user_id: int) -> dict | None:

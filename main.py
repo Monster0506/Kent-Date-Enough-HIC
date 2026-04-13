@@ -19,7 +19,11 @@ from db import (
     get_user_settings,
     get_user_testimonial,
     upsert_testimonial,
+    save_course,
+    get_schedule,
+    remove_course,
 )
+from scraper import lookup_crns
 from kindling import Application
 from kindling.reactive import on, signal
 from urllib.parse import quote as _url_quote
@@ -409,6 +413,75 @@ def settings_post(req):
         user_id, match_all_majors, match_men, match_women, match_nb, match_other
     )
     return redirect("/settings")
+
+
+@app.get("/schedule")
+def schedule_get(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    return app.render(
+        "schedule.html",
+        schedule=get_schedule(user_id),
+        preview=None,
+        error=None,
+        crn_input="",
+        notif_count=_nc(user_id),
+    )
+
+
+@app.post("/schedule")
+def schedule_post(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+
+    action = req.form_value("action") or ""
+
+    if action == "remove":
+        crn = (req.form_value("crn") or "").strip()
+        if crn:
+            remove_course(user_id, crn)
+        return redirect("/schedule")
+
+    if action == "save":
+        import json
+        raw = req.form_value("courses_json") or "[]"
+        try:
+            courses = json.loads(raw)
+        except Exception:
+            courses = []
+        for course in courses:
+            save_course(user_id, course)
+        return redirect("/schedule")
+
+    raw_input = req.form_value("crns") or ""
+    import re
+    crns = re.split(r"[\s,;]+", raw_input.strip())
+    crns = [c.strip() for c in crns if c.strip().isdigit()]
+
+    if not crns:
+        return app.render(
+            "schedule.html",
+            schedule=get_schedule(user_id),
+            preview=None,
+            error="Enter at least one CRN.",
+            crn_input=raw_input,
+            notif_count=_nc(user_id),
+        )
+
+    preview = lookup_crns(crns)
+    not_found = [c for c in crns if not any(p["crn"] == c for p in preview)]
+
+    return app.render(
+        "schedule.html",
+        schedule=get_schedule(user_id),
+        preview=preview,
+        not_found=not_found,
+        error=None,
+        crn_input=raw_input,
+        notif_count=_nc(user_id),
+    )
 
 
 @app.get("/logout")
