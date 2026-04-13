@@ -513,12 +513,14 @@ def schedule_get(req):
     user_id = get_session(req)
     if not user_id:
         return redirect("/login")
+    removed_crn = req.query("removed_crn") or ""
     return app.render(
         "schedule.html",
         schedule=get_schedule(user_id),
         preview=None,
         error=None,
         crn_input="",
+        removed_crn=removed_crn,
         notif_count=_nc(user_id),
     )
 
@@ -535,6 +537,15 @@ def schedule_post(req):
         crn = (req.form_value("crn") or "").strip()
         if crn:
             remove_course(user_id, crn)
+        return redirect("/schedule?removed_crn=" + _url_quote(crn, safe=""))
+
+    if action == "undo_remove":
+        import re as _re
+        crn = (req.form_value("crn") or "").strip()
+        if crn and crn.isdigit():
+            restored = lookup_crns([crn])
+            for course in restored:
+                save_course(user_id, course)
         return redirect("/schedule")
 
     if action == "save":
@@ -560,6 +571,7 @@ def schedule_post(req):
             preview=None,
             error="Enter at least one CRN.",
             crn_input=raw_input,
+            removed_crn="",
             notif_count=_nc(user_id),
         )
 
@@ -573,6 +585,7 @@ def schedule_post(req):
         not_found=not_found,
         error=None,
         crn_input=raw_input,
+        removed_crn="",
         notif_count=_nc(user_id),
     )
 

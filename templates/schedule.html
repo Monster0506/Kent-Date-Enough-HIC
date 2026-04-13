@@ -15,6 +15,18 @@
 
             <h1 class="font-jura font-bold text-white m-0 text-[clamp(1.8rem,4vw,2.8rem)] [text-shadow:0_1px_6px_rgba(2,54,114,0.7),0_2px_14px_rgba(2,54,114,0.4)]">My Schedule</h1>
 
+            {% if removed_crn %}
+            <form method="post" action="/schedule" class="flex items-center gap-3 bg-brand-slate py-[0.5rem] px-5 rounded-[6px] animate-toast-in">
+                <input type="hidden" name="action" value="undo_remove">
+                <input type="hidden" name="crn" value="{{ removed_crn }}">
+                <span class="font-inter text-[0.88rem] text-brand-blue">Course removed.</span>
+                <button type="submit"
+                    class="font-inter text-[0.88rem] font-bold text-brand-blue underline bg-transparent border-none cursor-pointer p-0">
+                    Undo
+                </button>
+            </form>
+            {% endif %}
+
             <div class="w-[min(96vw,1100px)] bg-brand-slate rounded-2xl py-8 px-10 flex flex-col gap-8">
 
                 <!-- Lookup form -->
