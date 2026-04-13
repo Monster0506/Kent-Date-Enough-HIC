@@ -235,17 +235,27 @@ def get_notifications(user_id: int) -> list[dict]:
         for m in matches:
             notifs.append({"type": "match", "match_id": m["id"], "name": m["name"] or m["username"]})
 
-        msg_count = conn.execute(
-            """SELECT COUNT(*) FROM messages msg
+        unread_by_match = conn.execute(
+            """SELECT m.id AS match_id,
+                      u.name, u.username,
+                      COUNT(msg.id) AS unread_count
+               FROM messages msg
                JOIN matches m ON m.id = msg.match_id
+               JOIN users u ON u.id = CASE WHEN m.user_a_id = ? THEN m.user_b_id ELSE m.user_a_id END
                LEFT JOIN message_reads mr ON mr.user_id = ? AND mr.match_id = msg.match_id
                WHERE (m.user_a_id = ? OR m.user_b_id = ?)
                  AND msg.sender_id != ?
-                 AND msg.id > COALESCE(mr.last_read_id, 0)""",
-            (user_id, user_id, user_id, user_id),
-        ).fetchone()[0]
-        if msg_count:
-            notifs.append({"type": "message", "count": msg_count})
+                 AND msg.id > COALESCE(mr.last_read_id, 0)
+               GROUP BY m.id""",
+            (user_id, user_id, user_id, user_id, user_id),
+        ).fetchall()
+        for row in unread_by_match:
+            notifs.append({
+                "type": "message",
+                "match_id": row["match_id"],
+                "name": row["name"] or row["username"],
+                "count": row["unread_count"],
+            })
 
         row = conn.execute("SELECT name, age, photo_path FROM users WHERE id = ?", (user_id,)).fetchone()
         if not row["name"] or not row["age"] or not row["photo_path"]:

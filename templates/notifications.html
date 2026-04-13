@@ -40,11 +40,11 @@
 
                 {% elif n.type == 'message' %}
                 <div class="notif-card">
-                    <i class="fa-solid fa-circle-info notif-icon"></i>
+                    <i class="fa-solid fa-envelope notif-icon"></i>
                     <div class="notif-body">
-                        <p class="notif-heading">You have a new message</p>
-                        <p class="notif-desc">You have {{ n.count }} unread message{{ 's' if n.count != 1 else '' }}. Click "Chat" to continue the conversation.</p>
-                        <a href="/chats" class="notif-btn">Chat</a>
+                        <p class="notif-heading">New message from {{ n.name }}</p>
+                        <p class="notif-desc">{{ n.count }} unread message{{ 's' if n.count != 1 else '' }}</p>
+                        <a href="/chats?match={{ n.match_id }}" class="notif-btn">Open Chat</a>
                     </div>
                 </div>
 
