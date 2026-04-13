@@ -59,7 +59,10 @@
 
                     {% if profile.compat_score %}
                     <div class="px-4 pb-[0.55rem] text-center">
-                        <span class="font-jura text-[0.72rem] font-bold text-brand-gold">{{ profile.compat_score }} compatibility</span>
+                        <span class="font-jura text-[0.72rem] font-bold text-brand-gold"
+                            title="Score based on shared classes (+3 each), same major (+2), same year (+1), and overlapping free periods (+1 each)">
+                            {{ profile.compat_score }} compatibility &#x24D8;
+                        </span>
                     </div>
                     {% endif %}
 
