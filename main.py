@@ -497,7 +497,15 @@ def settings_post(req):
     update_user_settings(
         user_id, match_all_majors, match_men, match_women, match_nb, match_other
     )
-    return redirect("/settings")
+    settings = get_user_settings(user_id)
+    user = _get_user(user_id)
+    return app.render(
+        "settings.html",
+        notif_count=_nc(user_id),
+        settings=settings,
+        user=user,
+        saved=True,
+    )
 
 
 @app.get("/schedule")

@@ -42,6 +42,9 @@
                 {% if error %}
                 <p class="font-inter text-[0.85rem] text-brand-danger">{{ error }}</p>
                 {% endif %}
+                {% if saved %}
+                <p class="font-inter text-[0.85rem] text-brand-blue font-semibold">Settings saved.</p>
+                {% endif %}
 
                 <input type="submit" value="Submit"
                     class="inline-block py-[0.65rem] px-[1.8rem] rounded-full font-bold text-base cursor-pointer border-2 border-transparent bg-brand-blue text-brand-yellow w-fit hover:opacity-85 transition-opacity duration-150">
