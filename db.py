@@ -478,3 +478,16 @@ def get_user_settings(userID: int):
             "match_other": 1,
         }
     return dict(settings)
+
+def reset_password(username: str, new_password: str) -> bool:
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT id FROM users WHERE username = ?", (username,)
+        ).fetchone()
+        if not row:
+            return False
+        conn.execute(
+            "UPDATE users SET password_hash = ? WHERE id = ?",
+            (hash_password(new_password), row["id"]),
+        )
+    return True
