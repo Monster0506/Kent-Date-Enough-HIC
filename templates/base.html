@@ -1,68 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Kent Date Enough{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Jura:wght@400;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Jura:wght@400;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    'brand-yellow': '#EAAB00',
-                    'brand-cream':  '#FEEAD1',
-                    'brand-blue':   '#023672',
-                    'brand-gold':   '#A17002',
-                    'brand-slate':  '#BBC7DF',
-                    'brand-red':    '#FEB8B8',
-                    'brand-green':  '#BCFEB8',
-                    'brand-danger': '#FB2D30',
-                    'brand-gray':   '#CFCFCF',
-                },
-                fontFamily: {
-                    'inter': ['Inter', 'sans-serif'],
-                    'jura':  ['Jura',  'sans-serif'],
-                },
-                keyframes: {
-                    'toast-in': {
-                        'from': { opacity: '0', transform: 'translateY(-6px)' },
-                        'to':   { opacity: '1', transform: 'translateY(0)' },
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-yellow': '#EAAB00',
+                        'brand-cream': '#FEEAD1',
+                        'brand-blue': '#023672',
+                        'brand-gold': '#A17002',
+                        'brand-slate': '#BBC7DF',
+                        'brand-red': '#FEB8B8',
+                        'brand-green': '#BCFEB8',
+                        'brand-danger': '#FB2D30',
+                        'brand-gray': '#CFCFCF',
                     },
-                },
-                animation: {
-                    'toast-in': 'toast-in 0.2s ease',
-                },
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                        'jura': ['Jura', 'sans-serif'],
+                    },
+                    keyframes: {
+                        'toast-in': {
+                            'from': { opacity: '0', transform: 'translateY(-6px)' },
+                            'to': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                    },
+                    animation: {
+                        'toast-in': 'toast-in 0.2s ease',
+                    },
+                }
             }
         }
-    }
     </script>
     <style>
         /* CSS custom properties consumed by bolt.css */
         :root {
-            --dark-yellow:  #EAAB00;
+            --dark-yellow: #EAAB00;
             --light-yellow: #FEEAD1;
-            --dark-blue:    #023672;
+            --dark-blue: #023672;
         }
+
         /* JS-toggled sidebar states */
-        .sidebar-open   { transform: translateX(0) !important; }
-        .overlay-active { display: block !important; }
+        .sidebar-open {
+            transform: translateX(0) !important;
+        }
+
+        .overlay-active {
+            display: block !important;
+        }
+
         /* JS-set password hint colors */
-        .pw-match    { color: #A17002; }
-        .pw-mismatch { color: #FB2D30; }
+        .pw-match {
+            color: #A17002;
+        }
+
+        .pw-mismatch {
+            color: #FB2D30;
+        }
     </style>
     <link rel="stylesheet" href="/static/css/bolt.css">
     {% block head %}{% endblock %}
 </head>
+
 <body class="font-inter bg-brand-cream text-black min-h-screen overflow-y-auto {% block body_class %}{% endblock %}">
     {% block layout %}
     <main class="w-full min-h-screen">
         {% block content %}{% endblock %}
     </main>
     {% endblock %}
+    {% include 'key_binds.html' %}
 </body>
+
 </html>

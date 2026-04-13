@@ -1,67 +1,62 @@
 {% extends "base.html" %}
 
 {% block title %}Testimonials — Kent Date Enough{% endblock %}
-{% block body_class %}overflow-hidden{% endblock %}
+{% block body_class %}discover{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/css/discover.css">
+<link rel="stylesheet" href="/static/css/testimonials.css">
+{% endblock %}
 
 {% block layout %}
-<div class="w-screen h-screen overflow-hidden relative">
+<div class="discover-shell">
 
     {% with active_nav = 'testimonials' %}{% include '_nav.html' %}{% endwith %}
 
-    <main class="w-full h-full relative flex items-center justify-center">
+    <main class="discover-main">
         {% include '_bolt_bg.html' %}
 
-        <div class="relative z-10 flex flex-col items-center gap-4 p-6">
-            <div class="w-[min(90vw,820px)] max-h-[80vh] overflow-y-auto bg-brand-slate rounded-2xl py-8 px-10">
+        <div class="discover-center">
+            <div class="testimonials-panel">
+                <h1 class="testimonials-title card-page-title">What people are saying</h1>
 
-                <h1 class="font-jura text-[clamp(1.8rem,4vw,2.8rem)] font-bold text-brand-blue mb-0 text-center">What people are saying</h1>
-
-                <!-- Submit form -->
-                <form class="flex flex-col gap-2 mb-7 mt-6 bg-white rounded-xl p-5" method="post" action="/testimonials">
+                <form class="testimonial-form" method="post" action="/testimonials">
                     <textarea
                         name="body"
-                        class="testimonial-input w-full min-h-[80px] resize-y border-[1.5px] border-brand-slate rounded-lg py-[0.6rem] px-3 font-inter text-[0.9rem] text-black bg-white outline-none transition-colors duration-150 focus:border-brand-blue"
+                        class="testimonial-input"
                         maxlength="300"
                         placeholder="Share your Kent Date Enough story…"
                     >{{ my_testimonial.body if my_testimonial else '' }}</textarea>
-
-                    {% if error %}
-                    <p class="font-inter text-[0.85rem] text-brand-danger m-0">{{ error }}</p>
-                    {% endif %}
-
-                    <div class="flex justify-between items-center">
-                        <span class="font-inter text-[0.8rem] text-brand-blue opacity-60"><span id="tcount">0</span>/300</span>
-                        <button type="submit"
-                            class="inline-block py-[0.65rem] px-[1.8rem] rounded-full font-bold text-base cursor-pointer border-2 border-transparent bg-brand-blue text-brand-yellow hover:opacity-85 transition-opacity duration-150">
+                    {% if error %}<p class="testimonial-form-error">{{ error }}</p>{% endif %}
+                    <div class="testimonial-form-footer">
+                        <span class="testimonial-char-count"><span id="tcount">0</span>/300</span>
+                        <button type="submit" class="btn btn-submit">
                             {{ 'Update' if my_testimonial else 'Share' }} &#x2197;
                         </button>
                     </div>
                 </form>
 
-                <!-- Testimonials grid -->
-                <div class="grid gap-5 mt-6" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+                <div class="testimonials-grid">
                     {% for t in testimonials %}
-                    <div class="bg-white rounded-xl p-5 flex gap-4 items-start">
-                        <div class="shrink-0 w-[52px] h-[52px] rounded-full overflow-hidden">
+                    <div class="testimonial-card">
+                        <div class="testimonial-avatar">
                             {% if t.photo_path %}
-                                <img src="/static/{{ t.photo_path }}" alt="{{ t.name or t.username }}"
-                                    class="w-full h-full object-cover object-top">
+                                <img src="/static/{{ t.photo_path }}" alt="{{ t.name or t.username }}">
                             {% else %}
-                                <div class="w-full h-full bg-brand-slate flex items-center justify-center text-brand-blue text-[1.3rem]">
+                                <div class="testimonial-avatar-placeholder">
                                     <i class="fa-solid fa-user"></i>
                                 </div>
                             {% endif %}
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <p class="font-inter text-[0.9rem] text-black leading-[1.5]">"{{ t.body }}"</p>
-                            <p class="font-jura text-[0.85rem] font-bold text-brand-gold">— {{ t.name or t.username }}</p>
+                        <div class="testimonial-body">
+                            <p class="testimonial-text">"{{ t.body }}"</p>
+                            <p class="testimonial-name">— {{ t.name or t.username }}</p>
                         </div>
                     </div>
                     {% else %}
-                    <p class="font-inter text-brand-blue text-center col-span-full">No testimonials yet.</p>
+                    <p class="testimonials-empty">No testimonials yet.</p>
                     {% endfor %}
                 </div>
-
             </div>
         </div>
     </main>
@@ -70,7 +65,7 @@
 
 <script>
 (function () {
-    var ta      = document.querySelector('.testimonial-input');
+    var ta = document.querySelector('.testimonial-input');
     var counter = document.getElementById('tcount');
     function update() { counter.textContent = ta.value.length; }
     ta.addEventListener('input', update);
