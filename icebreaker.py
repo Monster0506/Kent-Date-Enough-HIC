@@ -68,5 +68,6 @@ Icebreaker:"""
         model="gemini-3-flash-preview",
         contents=prompt,
     )
+    print(response.text)
     return (response.text or "").strip()
 

@@ -27,11 +27,23 @@ from db import (
 )
 from scraper import lookup_crns
 from icebreaker import generate_icebreaker
+import json
+import queue
+
 from kindling import Application
 from kindling.reactive import on, signal
+from kindling.streaming import StreamedHttpResponse
 from urllib.parse import quote as _url_quote
 from kindling.response import Response, redirect
 from session import clear_session_header, get_session, set_session_header
+
+_icebreaker_subscribers: list[queue.SimpleQueue] = []
+
+
+def _broadcast_icebreaker(match_id: int, text: str) -> None:
+    payload = json.dumps({"match_id": match_id, "text": text})
+    for q in list(_icebreaker_subscribers):
+        q.put_nowait(payload)
 
 init_db()
 
@@ -275,10 +287,35 @@ def _make_icebreaker(match_id: int, user_a_id: int, user_b_id: int):
             text = generate_icebreaker(ua, ub, sa, sb)
             if text:
                 set_match_icebreaker(match_id, text)
+                _broadcast_icebreaker(match_id, text)
         except Exception as exc:
             print(f"[icebreaker] error: {exc}")
 
     threading.Thread(target=_run, daemon=True).start()
+
+
+@app.get("/_icebreaker/stream")
+def icebreaker_stream(_req):
+    def _generate():
+        q: queue.SimpleQueue = queue.SimpleQueue()
+        _icebreaker_subscribers.append(q)
+        try:
+            while True:
+                try:
+                    msg = q.get(timeout=20.0)
+                    yield f"data: {msg}\n\n".encode()
+                except queue.Empty:
+                    yield b": ping\n\n"
+        finally:
+            _icebreaker_subscribers.remove(q)
+
+    headers = (
+        ("Content-Type", "text/event-stream; charset=utf-8"),
+        ("Cache-Control", "no-cache"),
+        ("Connection", "keep-alive"),
+        ("X-Accel-Buffering", "no"),
+    )
+    return StreamedHttpResponse(200, headers, _generate())
 
 
 @app.post("/discover")
@@ -289,7 +326,7 @@ def discover_post(req):
     action = req.form_value("action") or ""
     swiped_id = int(req.form_value("swiped_id") or 0)
     toast = ""
-    if swiped_id:
+    if swiped_id and swiped_id != user_id:
         if action == "accept":
             match_id = record_swipe(user_id, swiped_id, "right")
             if match_id:
