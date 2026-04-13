@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 
 {% block title %}Kent Date Enough{% endblock %}
-{% block body_class %}landing{% endblock %}
+{% block body_class %}overflow-hidden bg-brand-blue{% endblock %}
 
 {% block content %}
 {% include '_bolt_bg.html' %}
-<div class="landing-hero">
+<div class="relative z-10 flex w-screen h-screen overflow-hidden">
 
-    <div class="landing-center">
-        <h1 class="landing-title">
+    <div class="flex-1 flex flex-col justify-center pl-[6%] pr-[4%]">
+        <h1 class="flex flex-col font-jura font-bold text-[clamp(2.8rem,6vw,5.5rem)] leading-[1.05] text-brand-gold">
             <span>Kent</span>
             <span>Date</span>
             <span>Enough</span>
         </h1>
-        <p class="landing-tagline">Find a lover in a flash.</p>
-        <div class="landing-actions">
-            <a href="/login" class="btn btn-primary">Log In</a>
-            <a href="/signup" class="btn btn-secondary">Sign Up</a>
+        <p class="mt-3 font-jura text-[clamp(0.9rem,1.6vw,1.25rem)] text-brand-gold italic">Find a lover in a flash.</p>
+        <div class="flex gap-4 mt-10">
+            <a href="/login"  class="inline-block py-[0.65rem] px-[1.8rem] rounded font-bold text-base no-underline cursor-pointer border-2 border-brand-yellow bg-brand-yellow  text-brand-blue  hover:opacity-85 transition-opacity duration-150">Log In</a>
+            <a href="/signup" class="inline-block py-[0.65rem] px-[1.8rem] rounded font-bold text-base no-underline cursor-pointer border-2 border-brand-cream  bg-transparent text-brand-cream hover:opacity-85 transition-opacity duration-150">Sign Up</a>
         </div>
     </div>
 

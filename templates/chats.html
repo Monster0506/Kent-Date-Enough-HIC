@@ -1,76 +1,138 @@
 {% extends "base.html" %}
 
 {% block title %}Chats — Kent Date Enough{% endblock %}
-{% block body_class %}discover{% endblock %}
+{% block body_class %}overflow-hidden{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href="/static/css/discover.css">
-<link rel="stylesheet" href="/static/css/chats.css">
+<style>
+/* Icebreaker styles — also consumed by JS-injected innerHTML */
+.icebreaker-label {
+    font-family: 'Jura', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.75;
+    display: block;
+    margin-bottom: 0.35rem;
+}
+.icebreaker-body {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin: 0;
+}
+@keyframes icebreaker-shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position:  200% center; }
+}
+.icebreaker-shimmer {
+    height: 0.8rem;
+    border-radius: 4px;
+    margin-bottom: 0.45rem;
+    width: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.12) 25%, rgba(255,255,255,0.30) 50%, rgba(255,255,255,0.12) 75%);
+    background-size: 200% 100%;
+    animation: icebreaker-shimmer 1.4s ease-in-out infinite;
+}
+</style>
 {% endblock %}
 
 {% block layout %}
-<div class="discover-shell">
+<div class="w-screen h-screen overflow-hidden relative">
 
     {% with active_nav = 'chats' %}{% include '_nav.html' %}{% endwith %}
 
-    <main class="discover-main">
+    <main class="w-full h-full relative flex items-center justify-center">
         {% include '_bolt_bg.html' %}
 
-        <div class="discover-center">
-            <h1 class="page-bolt-title">Chats</h1>
-            <div class="chats-panel">
+        <div class="relative z-10 flex flex-col items-center gap-4 p-6">
+            <h1 class="font-jura font-bold text-white m-0 text-[clamp(1.8rem,4vw,2.8rem)] [text-shadow:0_1px_6px_rgba(2,54,114,0.7),0_2px_14px_rgba(2,54,114,0.4)]">Chats</h1>
 
-                <div class="chats-sidebar">
+            <!-- Chat panel -->
+            <div class="relative z-10 grid w-[min(90vw,820px)] h-[min(80vh,600px)] bg-brand-slate rounded-2xl overflow-hidden"
+                style="grid-template-columns: 260px 1fr;">
+
+                <!-- Sidebar: match list -->
+                <div class="border-r-2 border-r-[rgba(2,54,114,0.15)] overflow-y-auto flex flex-col gap-2 p-3">
                     {% for m in matches %}
                     <a href="/chats?match={{ m.id }}"
-                       class="chat-row {% if active and active.id == m.id %}chat-row-active{% endif %}">
-                        <div class="chat-row-avatar">
+                        class="flex items-center gap-3 py-[0.65rem] px-3 rounded-[10px] no-underline transition-opacity duration-150 hover:opacity-85 {% if active and active.id == m.id %}bg-brand-blue text-brand-cream{% else %}bg-white text-brand-blue{% endif %}">
+                        <div class="w-[38px] h-[38px] rounded-full overflow-hidden shrink-0">
                             {% if m.photo_path %}
-                                <img src="/static/{{ m.photo_path }}" alt="{{ m.name or m.username }}">
+                                <img src="/static/{{ m.photo_path }}" alt="{{ m.name or m.username }}"
+                                    class="w-full h-full object-cover object-top">
                             {% else %}
-                                <div class="chat-row-avatar-placeholder"><i class="fa-solid fa-user"></i></div>
+                                <div class="w-full h-full bg-brand-slate flex items-center justify-center text-base text-brand-blue">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
                             {% endif %}
                         </div>
-                        <span class="chat-row-name">{{ m.name or m.username }}</span>
+                        <span class="font-inter text-[0.9rem] font-semibold truncate">{{ m.name or m.username }}</span>
                     </a>
                     {% else %}
-                    <p class="chats-empty">No matches yet.</p>
+                    <p class="font-inter text-[0.85rem] text-brand-blue text-center p-4">No matches yet.</p>
                     {% endfor %}
                 </div>
 
-                <div class="chats-convo">
+                <!-- Conversation pane -->
+                <div class="flex flex-col overflow-hidden">
                     {% if active %}
-                    <div class="chats-convo-header">{{ active.name or active.username }}</div>
+                    <div class="font-jura text-base font-bold text-brand-blue py-[0.85rem] px-5 border-b-2 border-b-[rgba(2,54,114,0.15)] shrink-0">
+                        {{ active.name or active.username }}
+                    </div>
 
-                    <div class="chats-messages" id="messages">
+                    <div class="flex-1 overflow-y-auto py-4 px-5 flex flex-col gap-2" id="messages">
+
+                        <!-- Icebreaker card -->
                         {% if icebreaker %}
-                        <div class="icebreaker-card" id="icebreaker-card">
+                        <div class="rounded-[14px] py-[0.85rem] px-[1.1rem] mb-2 shrink-0 text-brand-cream" id="icebreaker-card"
+                            style="background: linear-gradient(135deg, #023672 0%, #1a5fa8 100%);">
                             <span class="icebreaker-label">✦ Icebreaker</span>
                             <p class="icebreaker-body">{{ icebreaker }}</p>
                         </div>
                         {% else %}
-                        <div class="icebreaker-card icebreaker-loading" id="icebreaker-card" aria-label="Generating icebreaker…">
+                        <div class="icebreaker-loading rounded-[14px] py-[0.85rem] px-[1.1rem] mb-2 shrink-0 text-brand-cream" id="icebreaker-card"
+                            aria-label="Generating icebreaker…"
+                            style="background: linear-gradient(135deg, #023672 0%, #1a5fa8 100%);">
                             <span class="icebreaker-label">✦ Icebreaker</span>
                             <div class="icebreaker-shimmer"></div>
                             <div class="icebreaker-shimmer" style="width:60%"></div>
                         </div>
                         {% endif %}
+
+                        <!-- Messages -->
                         {% for msg in messages %}
-                        <div class="bubble-wrap {% if msg.sender_id == user_id %}bubble-mine{% else %}bubble-theirs{% endif %}">
-                            <div class="bubble">{{ msg.body }}</div>
+                        <div class="flex {% if msg.sender_id == user_id %}justify-end{% else %}justify-start{% endif %}">
+                            <div class="max-w-[65%] py-[0.55rem] px-[0.9rem] font-inter text-[0.9rem] leading-[1.45] break-words
+                                {% if msg.sender_id == user_id %}
+                                    bg-brand-blue text-brand-cream rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl rounded-br-[4px]
+                                {% else %}
+                                    bg-white text-black rounded-tl-[4px] rounded-tr-2xl rounded-bl-2xl rounded-br-2xl
+                                {% endif %}">
+                                {{ msg.body }}
+                            </div>
                         </div>
                         {% else %}
-                        {% if not icebreaker %}<p class="chats-no-messages">Say hello!</p>{% endif %}
+                        {% if not icebreaker %}<p class="font-inter text-[0.85rem] text-brand-blue text-center m-auto">Say hello!</p>{% endif %}
                         {% endfor %}
                     </div>
 
-                    <form class="chats-input-row" method="post" action="/chats">
+                    <!-- Input row -->
+                    <form class="flex gap-2 py-3 px-4 border-t-2 border-t-[rgba(2,54,114,0.15)] shrink-0" method="post" action="/chats">
                         <input type="hidden" name="match_id" value="{{ active.id }}">
-                        <input type="text" name="body" placeholder="Message…" autocomplete="off" autofocus>
-                        <button type="submit"><i class="fa-solid fa-paper-plane"></i> Send</button>
+                        <input type="text" name="body" placeholder="Message…" autocomplete="off" autofocus
+                            class="flex-1 py-[0.6rem] px-[0.9rem] border-none rounded-[20px] bg-white font-inter text-[0.9rem] text-black outline-none focus:shadow-[0_0_0_2px_#023672]">
+                        <button type="submit"
+                            class="px-4 h-[38px] rounded-[20px] border-none bg-brand-blue text-brand-cream font-inter text-[0.9rem] font-semibold gap-[0.4rem] cursor-pointer flex items-center justify-center shrink-0 hover:opacity-85 transition-opacity duration-150">
+                            <i class="fa-solid fa-paper-plane"></i> Send
+                        </button>
                     </form>
+
                     {% else %}
-                    <div class="chats-no-match">Select a match to start chatting.</div>
+                    <div class="flex-1 flex items-center justify-center font-inter text-[0.9rem] text-brand-blue">
+                        Select a match to start chatting.
+                    </div>
                     {% endif %}
                 </div>
 

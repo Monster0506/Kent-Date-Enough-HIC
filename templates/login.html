@@ -1,29 +1,39 @@
 {% extends "base.html" %}
 
 {% block title %}Log In — Kent Date Enough{% endblock %}
-{% block body_class %}auth{% endblock %}
-
-{% block head %}
-<link rel="stylesheet" href="/static/css/auth.css">
-{% endblock %}
+{% block body_class %}overflow-hidden relative{% endblock %}
 
 {% block content %}
 {% include '_bolt_bg.html' %}
 
-<div class="auth-card">
-    <h1 class="auth-title">Log In</h1>
-    <form method="post" action="/login">
-        <div class="field">
-            <input type="text" name="username" placeholder="Username" required autocomplete="username">
-        </div>
-        <div class="field">
-            <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
-        </div>
-        {% if error %}
-        <p class="auth-error">{{ error }}</p>
-        {% endif %}
-        <button type="submit" class="btn btn-primary auth-submit">Log In ↗</button>
-    </form>
-    <p class="auth-footer">Don't have an account? <a href="/signup">Sign Up</a></p>
+<div class="flex items-center justify-center w-full min-h-screen">
+    <div class="relative z-10 bg-brand-cream border-2 border-brand-slate rounded-[6px] py-10 px-8 w-full max-w-[340px]">
+        <h1 class="font-jura text-2xl font-bold text-brand-blue mb-6 text-center">Log In</h1>
+
+        <form method="post" action="/login">
+            <div class="mb-[0.85rem]">
+                <input type="text" name="username" placeholder="Username" required autocomplete="username"
+                    class="w-full py-[0.55rem] px-3 border-[1.5px] border-brand-slate rounded bg-white font-inter text-[0.95rem] text-black outline-none transition-colors duration-150 focus:border-brand-blue placeholder:text-brand-gray">
+            </div>
+            <div class="mb-[0.85rem]">
+                <input type="password" name="password" placeholder="Password" required autocomplete="current-password"
+                    class="w-full py-[0.55rem] px-3 border-[1.5px] border-brand-slate rounded bg-white font-inter text-[0.95rem] text-black outline-none transition-colors duration-150 focus:border-brand-blue placeholder:text-brand-gray">
+            </div>
+
+            {% if error %}
+            <p class="text-[0.85rem] text-brand-danger mb-3">{{ error }}</p>
+            {% endif %}
+
+            <button type="submit"
+                class="w-full mt-2 py-[0.65rem] px-[1.8rem] rounded font-bold text-base cursor-pointer border-2 border-transparent bg-brand-blue text-brand-cream hover:opacity-85 transition-opacity duration-150 text-center">
+                Log In ↗
+            </button>
+        </form>
+
+        <p class="mt-5 text-center text-[0.85rem] text-brand-blue">
+            Don't have an account?
+            <a href="/signup" class="text-brand-gold font-bold no-underline hover:underline">Sign Up</a>
+        </p>
+    </div>
 </div>
 {% endblock %}
