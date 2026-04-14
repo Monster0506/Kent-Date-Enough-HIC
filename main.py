@@ -36,6 +36,7 @@ from scraper import lookup_crns
 from icebreaker import generate_icebreaker
 import json
 import queue
+import threading
 
 from kindling import Application
 from kindling.reactive import on, signal
@@ -45,11 +46,14 @@ from kindling.response import Response, redirect
 from session import clear_session_header, get_session, set_session_header
 
 _icebreaker_subscribers: list[queue.SimpleQueue] = []
+_icebreaker_lock = threading.Lock()
 
 
 def _broadcast_icebreaker(match_id: int, text: str) -> None:
     payload = json.dumps({"match_id": match_id, "text": text})
-    for q in list(_icebreaker_subscribers):
+    with _icebreaker_lock:
+        subscribers = list(_icebreaker_subscribers)
+    for q in subscribers:
         q.put_nowait(payload)
 
 init_db()
@@ -306,7 +310,8 @@ def _make_icebreaker(match_id: int, user_a_id: int, user_b_id: int):
 def icebreaker_stream(_req):
     def _generate():
         q: queue.SimpleQueue = queue.SimpleQueue()
-        _icebreaker_subscribers.append(q)
+        with _icebreaker_lock:
+            _icebreaker_subscribers.append(q)
         try:
             while True:
                 try:
@@ -315,7 +320,8 @@ def icebreaker_stream(_req):
                 except queue.Empty:
                     yield b": ping\n\n"
         finally:
-            _icebreaker_subscribers.remove(q)
+            with _icebreaker_lock:
+                _icebreaker_subscribers.remove(q)
 
     headers = (
         ("Content-Type", "text/event-stream; charset=utf-8"),
