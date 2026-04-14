@@ -267,7 +267,7 @@ def get_matches(user_id: int) -> list[dict]:
         rows = conn.execute(
             """
             SELECT m.id,
-                   u.name, u.username, u.photo_path
+                   u.id AS other_user_id, u.name, u.username, u.photo_path
             FROM matches m
             JOIN users u ON u.id = CASE WHEN m.user_a_id = ? THEN m.user_b_id ELSE m.user_a_id END
             WHERE m.user_a_id = ? OR m.user_b_id = ?

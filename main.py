@@ -667,6 +667,30 @@ def schedule_post(req):
     )
 
 
+@app.get("/profile/{profile_id}")
+def profile_view(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    profile_id = int(req.route_params.get("profile_id") or 0)
+    if not profile_id:
+        return redirect("/chats")
+    if profile_id == user_id:
+        return redirect("/profile")
+    with get_conn() as conn:
+        has_match = conn.execute(
+            "SELECT 1 FROM matches WHERE (user_a_id=? AND user_b_id=?) OR (user_a_id=? AND user_b_id=?)",
+            (user_id, profile_id, profile_id, user_id),
+        ).fetchone()
+    if not has_match:
+        return redirect("/chats")
+    person = _get_user(profile_id)
+    if not person:
+        return redirect("/chats")
+    back_url = req.query("from") or "/chats"
+    return app.render("profile_view.html", person=person, back_url=back_url, notif_count=_nc(user_id))
+
+
 @app.get("/logout")
 def logout(req):
     resp = redirect("/")

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}{{ person.name or person.username }} — Kent Date Enough{% endblock %}
+{% block body_class %}overflow-hidden{% endblock %}
+
+{% block layout %}
+<div class="w-screen h-screen overflow-hidden relative">
+
+    {% with active_nav = '' %}{% include '_nav.html' %}{% endwith %}
+
+    <main class="w-full h-full relative flex items-center justify-center">
+        {% include '_bolt_bg.html' %}
+
+        <div class="relative z-10 flex flex-col items-center gap-4 p-6">
+
+            <div class="bg-brand-slate rounded-2xl p-8 w-[min(90vw,480px)] flex flex-col gap-5">
+
+                <a href="{{ back_url }}" class="font-inter text-[0.85rem] text-brand-blue hover:underline self-start">← Back</a>
+
+                <!-- Photo -->
+                <div class="w-full aspect-[3/2.8] rounded-xl overflow-hidden bg-brand-blue flex items-center justify-center">
+                    {% if person.photo_path %}
+                    <img src="/static/{{ person.photo_path }}" alt="{{ person.name or person.username }}"
+                        class="w-full h-full object-cover object-top">
+                    {% else %}
+                    <i class="fa-solid fa-user text-[4rem] text-brand-slate"></i>
+                    {% endif %}
+                </div>
+
+                <!-- Header info -->
+                <div class="flex flex-col gap-1">
+                    <h1 class="font-jura text-[1.6rem] font-bold text-brand-blue m-0">
+                        {{ person.name or person.username }}
+                        {% if person.pronouns %}<span class="font-inter text-[0.9rem] font-normal opacity-70"> · {{ person.pronouns }}</span>{% endif %}
+                    </h1>
+                    <p class="font-inter text-[0.9rem] text-brand-blue opacity-80 m-0">
+                        {% if person.age %}{{ person.age }}{% endif %}
+                        {% if person.year %} · {{ person.year }}{% endif %}
+                        {% if person.major %} · {{ person.major }}{% endif %}
+                        {% if person.height %} · {{ person.height }}{% endif %}
+                    </p>
+                </div>
+
+                <!-- Traits -->
+                {% set traits = person.about.split(',') | map('trim') | select | list if person.about else [] %}
+                {% if traits %}
+                <div class="flex flex-wrap gap-2">
+                    {% for t in traits %}
+                    <span class="font-inter text-[0.82rem] font-medium text-brand-blue bg-white rounded-full px-3 py-[0.25rem]">{{ t }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </main>
+
+</div>
+{% endblock %}
