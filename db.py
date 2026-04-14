@@ -430,6 +430,21 @@ def upsert_testimonial(user_id: int, body: str) -> None:
             )
 
 
+def delete_match(match_id: int, user_id: int) -> bool:
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT id FROM matches WHERE id = ? AND (user_a_id = ? OR user_b_id = ?)",
+            (match_id, user_id, user_id),
+        ).fetchone()
+        if not row:
+            return False
+        conn.execute("DELETE FROM message_reads WHERE match_id = ?", (match_id,))
+        conn.execute("DELETE FROM dismissed_matches WHERE match_id = ?", (match_id,))
+        conn.execute("DELETE FROM messages WHERE match_id = ?", (match_id,))
+        conn.execute("DELETE FROM matches WHERE id = ?", (match_id,))
+    return True
+
+
 def delete_testimonial(user_id: int) -> None:
     with get_conn() as conn:
         conn.execute("DELETE FROM testimonials WHERE user_id = ?", (user_id,))

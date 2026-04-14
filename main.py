@@ -28,6 +28,7 @@ from db import (
     get_match_icebreaker,
     clear_match_icebreaker,
     get_match_user_ids,
+    delete_match,
 )
 from db import (
     dismiss_match_notification,
@@ -404,6 +405,17 @@ def chats_get(req):
         icebreaker=icebreaker,
         notif_count=_nc(user_id),
     )
+
+
+@app.post("/chats/unmatch")
+def chats_unmatch(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    match_id = int(req.form_value("match_id") or 0)
+    if match_id:
+        delete_match(match_id, user_id)
+    return redirect("/chats")
 
 
 @app.post("/chats/regenerate")

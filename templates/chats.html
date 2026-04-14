@@ -78,8 +78,16 @@
                 <!-- Conversation pane -->
                 <div class="flex flex-col overflow-hidden">
                     {% if active %}
-                    <div class="font-jura text-base font-bold text-brand-blue py-[0.85rem] px-5 border-b-2 border-b-[rgba(2,54,114,0.15)] shrink-0">
-                        {{ active.name or active.username }}
+                    <div class="flex items-center justify-between font-jura text-base font-bold text-brand-blue py-[0.85rem] px-5 border-b-2 border-b-[rgba(2,54,114,0.15)] shrink-0">
+                        <span>{{ active.name or active.username }}</span>
+                        <form method="post" action="/chats/unmatch" style="margin:0;"
+                              onsubmit="return confirm('Unmatch with {{ active.name or active.username }}? This cannot be undone.')">
+                            <input type="hidden" name="match_id" value="{{ active.id }}">
+                            <button type="submit"
+                                class="font-inter text-[0.78rem] font-semibold text-brand-danger bg-transparent border border-brand-danger rounded-full px-3 py-[0.25rem] cursor-pointer hover:opacity-75 transition-opacity duration-150">
+                                Unmatch
+                            </button>
+                        </form>
                     </div>
 
                     <div class="flex-1 overflow-y-auto py-4 px-5 flex flex-col gap-2" id="messages">
