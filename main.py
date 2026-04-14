@@ -283,8 +283,12 @@ def discover_get(req):
     profile = get_next_profile(user_id, settings)
     toast = req.query("toast") or ""
     undo_id = int(req.query("undo") or 0)
+    nudge_profile = not me.get("major") or not me.get("year")
+    nudge_schedule = len(get_schedule(user_id)) == 0
     return app.render(
-        "discover.html", profile=profile, toast=toast, undo_id=undo_id, notif_count=_nc(user_id)
+        "discover.html", profile=profile, toast=toast, undo_id=undo_id,
+        notif_count=_nc(user_id),
+        nudge_profile=nudge_profile, nudge_schedule=nudge_schedule,
     )
 
 

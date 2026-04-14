@@ -382,10 +382,18 @@ def get_notifications(user_id: int) -> list[dict]:
             )
 
         row = conn.execute(
-            "SELECT name, age, photo_path FROM users WHERE id = ?", (user_id,)
+            "SELECT name, age, photo_path, major, year FROM users WHERE id = ?", (user_id,)
         ).fetchone()
         if not row["name"] or not row["age"] or not row["photo_path"]:
             notifs.append({"type": "profile"})
+        elif not row["major"] or not row["year"]:
+            notifs.append({"type": "profile_partial"})
+
+        course_count = conn.execute(
+            "SELECT COUNT(*) FROM user_schedules WHERE user_id = ?", (user_id,)
+        ).fetchone()[0]
+        if course_count == 0:
+            notifs.append({"type": "schedule"})
 
     return notifs
 

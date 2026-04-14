@@ -15,6 +15,24 @@
 
             <h1 class="font-jura font-bold text-white m-0 text-[clamp(1.8rem,4vw,2.8rem)] [text-shadow:0_1px_6px_rgba(2,54,114,0.7),0_2px_14px_rgba(2,54,114,0.4)]">Discover</h1>
 
+            {% if nudge_profile %}
+            <a href="/profile" class="no-underline w-full max-w-[min(90vw,780px)]">
+                <div class="flex items-center gap-3 bg-brand-yellow text-brand-blue font-inter text-[0.85rem] font-semibold py-[0.55rem] px-4 rounded">
+                    <i class="fa-solid fa-circle-exclamation shrink-0"></i>
+                    <span>Your major and year are missing — add them to improve your compatibility score.</span>
+                </div>
+            </a>
+            {% endif %}
+
+            {% if nudge_schedule %}
+            <a href="/schedule" class="no-underline w-full max-w-[min(90vw,780px)]">
+                <div class="flex items-center gap-3 bg-brand-yellow text-brand-blue font-inter text-[0.85rem] font-semibold py-[0.55rem] px-4 rounded">
+                    <i class="fa-solid fa-circle-exclamation shrink-0"></i>
+                    <span>Add your class schedule to find people in your classes.</span>
+                </div>
+            </a>
+            {% endif %}
+
             {% if toast %}
             <div class="bg-brand-yellow text-brand-blue font-jura font-bold text-[1.05rem] py-[0.55rem] px-6 rounded animate-toast-in">
                 {{ toast }}

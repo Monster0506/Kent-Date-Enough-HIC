@@ -57,11 +57,37 @@
                 <div class="bg-white rounded-[10px] py-5 px-6 flex gap-4 items-start">
                     <i class="fa-solid fa-circle-info text-brand-blue text-base mt-[0.15rem] shrink-0"></i>
                     <div class="flex flex-col gap-[0.35rem]">
-                        <p class="font-inter text-[0.95rem] font-bold text-black">Update Profile</p>
-                        <p class="font-inter text-[0.88rem] text-black leading-[1.45]">Complete your profile to get more matches. Make sure your profile has the most up to date information.</p>
+                        <p class="font-inter text-[0.95rem] font-bold text-black">Complete your profile</p>
+                        <p class="font-inter text-[0.88rem] text-black leading-[1.45]">Add your name, age, and a photo to start getting matches.</p>
                         <a href="/profile"
                             class="inline-block mt-2 py-[0.4rem] px-4 bg-brand-blue text-brand-cream font-inter text-[0.85rem] font-semibold rounded-[6px] no-underline hover:opacity-85 transition-opacity duration-150">
                             Update Profile
+                        </a>
+                    </div>
+                </div>
+
+                {% elif n.type == 'profile_partial' %}
+                <div class="bg-white rounded-[10px] py-5 px-6 flex gap-4 items-start">
+                    <i class="fa-solid fa-circle-info text-brand-blue text-base mt-[0.15rem] shrink-0"></i>
+                    <div class="flex flex-col gap-[0.35rem]">
+                        <p class="font-inter text-[0.95rem] font-bold text-black">Improve your matches</p>
+                        <p class="font-inter text-[0.88rem] text-black leading-[1.45]">Add your major and year to boost your compatibility score.</p>
+                        <a href="/profile"
+                            class="inline-block mt-2 py-[0.4rem] px-4 bg-brand-blue text-brand-cream font-inter text-[0.85rem] font-semibold rounded-[6px] no-underline hover:opacity-85 transition-opacity duration-150">
+                            Update Profile
+                        </a>
+                    </div>
+                </div>
+
+                {% elif n.type == 'schedule' %}
+                <div class="bg-white rounded-[10px] py-5 px-6 flex gap-4 items-start">
+                    <i class="fa-solid fa-calendar text-brand-blue text-base mt-[0.15rem] shrink-0"></i>
+                    <div class="flex flex-col gap-[0.35rem]">
+                        <p class="font-inter text-[0.95rem] font-bold text-black">Add your schedule</p>
+                        <p class="font-inter text-[0.88rem] text-black leading-[1.45]">Adding your classes lets us find people in your exact sections and boosts your compatibility score.</p>
+                        <a href="/schedule"
+                            class="inline-block mt-2 py-[0.4rem] px-4 bg-brand-blue text-brand-cream font-inter text-[0.85rem] font-semibold rounded-[6px] no-underline hover:opacity-85 transition-opacity duration-150">
+                            Add Schedule
                         </a>
                     </div>
                 </div>
