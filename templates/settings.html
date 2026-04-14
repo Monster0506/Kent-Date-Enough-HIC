@@ -39,6 +39,23 @@
                     <label for="genderSelectOther" class="font-inter text-sm cursor-pointer">Other</label>
                 </div>
 
+                <h2 class="font-jura font-bold text-brand-blue">Age Range</h2>
+                <div class="flex items-center gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label for="age_min" class="font-inter text-xs text-brand-blue opacity-70">Min</label>
+                        <input type="number" id="age_min" name="age_min" min="18" max="99"
+                            value="{{ settings.age_min or 18 }}"
+                            class="w-[72px] py-[0.4rem] px-[0.6rem] border border-brand-slate rounded-lg font-inter text-sm text-black bg-white outline-none focus:border-brand-blue transition-colors duration-150">
+                    </div>
+                    <span class="font-inter text-sm text-brand-blue mt-4">–</span>
+                    <div class="flex flex-col gap-1">
+                        <label for="age_max" class="font-inter text-xs text-brand-blue opacity-70">Max</label>
+                        <input type="number" id="age_max" name="age_max" min="18" max="99"
+                            value="{{ settings.age_max or 99 }}"
+                            class="w-[72px] py-[0.4rem] px-[0.6rem] border border-brand-slate rounded-lg font-inter text-sm text-black bg-white outline-none focus:border-brand-blue transition-colors duration-150">
+                    </div>
+                </div>
+
                 {% if error %}
                 <p class="font-inter text-[0.85rem] text-brand-danger">{{ error }}</p>
                 {% endif %}

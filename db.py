@@ -112,6 +112,12 @@ def init_db() -> None:
         if "icebreaker" not in match_cols:
             conn.execute("ALTER TABLE matches ADD COLUMN icebreaker TEXT")
 
+        settings_cols = [r[1] for r in conn.execute("PRAGMA table_info(user_settings)").fetchall()]
+        if "age_min" not in settings_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN age_min INTEGER DEFAULT 18")
+        if "age_max" not in settings_cols:
+            conn.execute("ALTER TABLE user_settings ADD COLUMN age_max INTEGER DEFAULT 99")
+
 
 def hash_password(password: str) -> str:
     salt = os.urandom(16)
@@ -149,6 +155,11 @@ def get_next_profile(user_id: int, settings: dict | None = None) -> dict | None:
                     f"(gender IN ({placeholders}) OR gender IS NULL OR gender = '')"
                 )
                 params.extend(allowed)
+
+            age_min = settings.get("age_min", 18)
+            age_max = settings.get("age_max", 99)
+            clauses.append("(age IS NULL OR (age >= ? AND age <= ?))")
+            params.extend([age_min, age_max])
 
         where = " AND ".join(clauses)
 
@@ -464,18 +475,22 @@ def update_user_settings(
     matchWomen: int,
     matchNB: int,
     matchOther: int,
+    age_min: int = 18,
+    age_max: int = 99,
 ):
     with get_conn() as conn:
         conn.execute(
-            "INSERT INTO user_settings(user_id, match_all_majors, match_men, match_women, match_nb, match_other) "
-            "VALUES (?, ?, ?, ?, ?, ?) "
+            "INSERT INTO user_settings(user_id, match_all_majors, match_men, match_women, match_nb, match_other, age_min, age_max) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
             "ON CONFLICT(user_id) DO UPDATE SET "
             "match_all_majors=excluded.match_all_majors, "
             "match_men=excluded.match_men, "
             "match_women=excluded.match_women, "
             "match_nb=excluded.match_nb, "
-            "match_other=excluded.match_other",
-            (userID, majorSetting, matchMen, matchWomen, matchNB, matchOther),
+            "match_other=excluded.match_other, "
+            "age_min=excluded.age_min, "
+            "age_max=excluded.age_max",
+            (userID, majorSetting, matchMen, matchWomen, matchNB, matchOther, age_min, age_max),
         )
 
 
@@ -490,14 +505,21 @@ def get_user_settings(userID: int):
             (userID,),
         ).fetchone()
     if not settings:
-        settings = {
+        return {
             "match_all_majors": 1,
             "match_men": 1,
             "match_women": 1,
             "match_nb": 1,
             "match_other": 1,
+            "age_min": 18,
+            "age_max": 99,
         }
-    return dict(settings)
+    result = dict(settings)
+    if result.get("age_min") is None:
+        result["age_min"] = 18
+    if result.get("age_max") is None:
+        result["age_max"] = 99
+    return result
 
 def reset_password(username: str, new_password: str) -> bool:
     with get_conn() as conn:

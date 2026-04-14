@@ -548,6 +548,17 @@ def settings_post(req):
     match_nb = 1 if req.form.get("genderSelectNB") else 0
     match_other = 1 if req.form.get("genderSelectOther") else 0
 
+    try:
+        age_min = int(req.form_value("age_min") or 18)
+        age_max = int(req.form_value("age_max") or 99)
+    except ValueError:
+        age_min, age_max = 18, 99
+
+    age_min = max(18, min(age_min, 99))
+    age_max = max(18, min(age_max, 99))
+    if age_min > age_max:
+        age_min, age_max = age_max, age_min
+
     if not (match_men or match_women or match_nb or match_other):
         settings = get_user_settings(user_id)
         user = _get_user(user_id)
@@ -560,7 +571,8 @@ def settings_post(req):
         )
 
     update_user_settings(
-        user_id, match_all_majors, match_men, match_women, match_nb, match_other
+        user_id, match_all_majors, match_men, match_women, match_nb, match_other,
+        age_min, age_max,
     )
     settings = get_user_settings(user_id)
     user = _get_user(user_id)
