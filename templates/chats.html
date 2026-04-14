@@ -120,7 +120,7 @@
 
                         <!-- Messages -->
                         {% for msg in messages %}
-                        <div class="flex {% if msg.sender_id == user_id %}justify-end{% else %}justify-start{% endif %}">
+                        <div class="flex flex-col {% if msg.sender_id == user_id %}items-end{% else %}items-start{% endif %} gap-[2px]">
                             <div class="max-w-[65%] py-[0.55rem] px-[0.9rem] font-inter text-[0.9rem] leading-[1.45] break-words
                                 {% if msg.sender_id == user_id %}
                                     bg-brand-blue text-brand-cream rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl rounded-br-[4px]
@@ -129,6 +129,9 @@
                                 {% endif %}">
                                 {{ msg.body }}
                             </div>
+                            {% if msg.sent_at %}
+                            <span class="font-inter text-[0.68rem] opacity-50 text-brand-blue px-1">{{ msg.sent_at[:16] }}</span>
+                            {% endif %}
                         </div>
                         {% else %}
                         {% if not icebreaker %}<p class="font-inter text-[0.85rem] text-brand-blue text-center m-auto">Say hello!</p>{% endif %}
