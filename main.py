@@ -31,6 +31,7 @@ from db import (
     delete_match,
     reset_password,
     delete_account,
+    report_user,
 )
 from scraper import lookup_crns
 from icebreaker import generate_icebreaker
@@ -85,7 +86,7 @@ def _nc(user_id):
 def _get_user(user_id):
     with get_conn() as conn:
         row = conn.execute(
-            "SELECT username, name, major, height, age, year, pronouns, gender, about, photo_path, created_at FROM users WHERE id = ?",
+            "SELECT id, username, name, major, height, age, year, pronouns, gender, about, photo_path, created_at FROM users WHERE id = ?",
             (user_id,),
         ).fetchone()
     return dict(row) if row else {}
@@ -647,6 +648,19 @@ def schedule_post(req):
         removed_crn="",
         notif_count=_nc(user_id),
     )
+
+
+@app.post("/report")
+def report_post(req):
+    user_id = get_session(req)
+    if not user_id:
+        return redirect("/login")
+    reported_id = int(req.form_value("reported_id") or 0)
+    reason = (req.form_value("reason") or "").strip()[:300]
+    back = req.form_value("back") or "/discover"
+    if reported_id and reported_id != user_id:
+        report_user(user_id, reported_id, reason)
+    return redirect(back)
 
 
 @app.get("/profile/{profile_id}")

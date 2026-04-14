@@ -15,7 +15,18 @@
 
             <div class="bg-brand-slate rounded-2xl p-8 w-[min(90vw,480px)] flex flex-col gap-5">
 
-                <a href="{{ back_url }}" class="font-inter text-[0.85rem] text-brand-blue hover:underline self-start">← Back</a>
+                <div class="flex items-center justify-between w-full">
+                    <a href="{{ back_url }}" class="font-inter text-[0.85rem] text-brand-blue hover:underline">← Back</a>
+                    <form method="post" action="/report" style="margin:0;">
+                        <input type="hidden" name="reported_id" value="{{ person.id }}">
+                        <input type="hidden" name="back" value="{{ back_url }}">
+                        <button type="submit"
+                            onclick="return confirm('Report this user?')"
+                            class="font-inter text-[0.75rem] text-brand-blue opacity-50 bg-transparent border-none cursor-pointer p-0 hover:opacity-100 hover:text-brand-danger transition-all duration-150">
+                            Report
+                        </button>
+                    </form>
+                </div>
 
                 <!-- Photo -->
                 <div class="w-full aspect-[3/2.8] rounded-xl overflow-hidden bg-brand-blue flex items-center justify-center">

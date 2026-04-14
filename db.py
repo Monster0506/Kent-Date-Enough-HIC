@@ -93,6 +93,15 @@ def init_db() -> None:
                 UNIQUE(user_id, crn)
             );
 
+            CREATE TABLE IF NOT EXISTS reports (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                reporter_id  INTEGER NOT NULL REFERENCES users(id),
+                reported_id  INTEGER NOT NULL REFERENCES users(id),
+                reason       TEXT,
+                created_at   DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(reporter_id, reported_id)
+            );
+
             CREATE TABLE IF NOT EXISTS user_settings(
                 id                  INTEGER     PRIMARY KEY AUTOINCREMENT,
                 user_id             INTEGER     NOT NULL UNIQUE REFERENCES users(id),
@@ -439,6 +448,18 @@ def upsert_testimonial(user_id: int, body: str) -> None:
                 "INSERT INTO testimonials (user_id, body) VALUES (?, ?)",
                 (user_id, body),
             )
+
+
+def report_user(reporter_id: int, reported_id: int, reason: str = "") -> None:
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO reports (reporter_id, reported_id, reason) VALUES (?, ?, ?)",
+            (reporter_id, reported_id, reason),
+        )
+        conn.execute(
+            "INSERT OR IGNORE INTO swipes (swiper_id, swiped_id, direction) VALUES (?, ?, 'left')",
+            (reporter_id, reported_id),
+        )
 
 
 def delete_match(match_id: int, user_id: int) -> bool:

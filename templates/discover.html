@@ -104,6 +104,16 @@
 
             </div>
 
+            <form method="post" action="/report" class="self-end">
+                <input type="hidden" name="reported_id" value="{{ profile.id }}">
+                <input type="hidden" name="back" value="/discover">
+                <button type="submit"
+                    onclick="return confirm('Report this user?')"
+                    class="font-inter text-[0.72rem] text-brand-blue opacity-50 bg-transparent border-none cursor-pointer p-0 hover:opacity-100 hover:text-brand-danger transition-all duration-150">
+                    Report
+                </button>
+            </form>
+
             {% else %}
             <div class="bg-brand-cream border-2 border-brand-slate rounded-[6px] py-10 px-8 text-center flex flex-col items-center gap-4 max-w-[300px] w-full">
                 <i class="fa-solid fa-heart-crack text-[2.5rem] text-brand-gold"></i>
