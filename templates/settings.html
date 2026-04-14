@@ -7,7 +7,7 @@
 
 {% with active_nav = 'settings' %}{% include '_nav.html' %}{% endwith %}
 
-<div class="flex flex-row items-stretch w-screen h-screen">
+<div class="flex flex-col sm:flex-row items-stretch w-screen min-h-screen overflow-y-auto">
 
     <!-- Left card: Match preferences -->
     <div class="flex flex-col bg-brand-gray text-black z-10 flex-grow m-[5%] rounded-2xl">
