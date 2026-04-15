@@ -13,10 +13,10 @@
 
         <div class="relative z-10 flex flex-col items-center gap-4 p-6">
 
-            <h1 class="font-jura font-bold text-white m-0 text-[clamp(1.8rem,4vw,2.8rem)] [text-shadow:0_1px_6px_rgba(2,54,114,0.7),0_2px_14px_rgba(2,54,114,0.4)]">My Schedule</h1>
 
             {% if removed_crn %}
-            <form method="post" action="/schedule" class="flex items-center gap-3 bg-brand-slate py-[0.5rem] px-5 rounded-[6px] animate-toast-in">
+            <form method="post" action="/schedule"
+                class="flex items-center gap-3 bg-brand-slate py-[0.5rem] px-5 rounded-[6px] animate-toast-in">
                 <input type="hidden" name="action" value="undo_remove">
                 <input type="hidden" name="crn" value="{{ removed_crn }}">
                 <span class="font-inter text-[0.88rem] text-brand-blue">Course removed.</span>
@@ -29,14 +29,17 @@
 
             <div class="w-[min(96vw,1100px)] bg-brand-slate rounded-2xl py-8 px-10 flex flex-col gap-8">
 
+                <h1
+                    class="font-jura font-bold text-brand-blue m-0 text-[clamp(1.8rem,4vw,2.8rem)]">
+                    My Schedule</h1>
+
                 <!-- Lookup form -->
                 <form class="flex flex-col gap-[0.6rem]" method="post" action="/schedule">
                     <input type="hidden" name="action" value="lookup">
                     <div class="flex gap-3 items-stretch">
                         <input type="text" name="crns"
                             class="flex-1 py-[0.6rem] px-[0.9rem] border-[1.5px] border-brand-blue rounded-lg font-inter text-[0.95rem] bg-white text-black outline-none transition-colors duration-150 focus:border-brand-gold"
-                            placeholder="Enter CRNs separated by spaces or commas…"
-                            value="{{ crn_input }}"
+                            placeholder="Enter CRNs separated by spaces or commas…" value="{{ crn_input }}"
                             autocomplete="off">
                         <button type="submit"
                             class="inline-block py-[0.65rem] px-[1.8rem] rounded-full font-bold text-base cursor-pointer border-2 border-transparent bg-brand-blue text-brand-yellow hover:opacity-85 transition-opacity duration-150">
@@ -58,24 +61,41 @@
                         <input type="hidden" name="action" value="save">
                         <input type="hidden" name="courses_json" value='{{ preview | tojson }}'>
 
-                        <table class="w-full border-collapse font-inter text-[0.85rem] bg-white rounded-[10px] overflow-hidden max-md:text-[0.75rem]">
+                        <table
+                            class="w-full border-collapse font-inter text-[0.85rem] bg-white rounded-[10px] overflow-hidden max-md:text-[0.75rem]">
                             <thead>
                                 <tr>
                                     {% for col in ['CRN','Course','Title','Days','Time','Location','Instructor'] %}
-                                    <th class="bg-brand-blue text-brand-yellow font-jura text-[0.8rem] uppercase tracking-[0.04em] py-[0.6rem] px-3 text-left whitespace-nowrap max-md:py-[0.4rem] max-md:px-2">{{ col }}</th>
+                                    <th
+                                        class="bg-brand-blue text-brand-yellow font-jura text-[0.8rem] uppercase tracking-[0.04em] py-[0.6rem] px-3 text-left whitespace-nowrap max-md:py-[0.4rem] max-md:px-2">
+                                        {{ col }}</th>
                                     {% endfor %}
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for c in preview %}
                                 <tr class="hover:[&>td]:bg-brand-cream">
-                                    <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.crn }}</td>
-                                    <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.subject }} {{ c.course_num }}</td>
-                                    <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.name }}</td>
-                                    <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.days }}</td>
-                                    <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.time }}</td>
-                                    <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.location }}</td>
-                                    <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2 last:border-b-0">{{ c.instructor }}</td>
+                                    <td
+                                        class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                        {{ c.crn }}</td>
+                                    <td
+                                        class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                        {{ c.subject }} {{ c.course_num }}</td>
+                                    <td
+                                        class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                        {{ c.name }}</td>
+                                    <td
+                                        class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                        {{ c.days }}</td>
+                                    <td
+                                        class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                        {{ c.time }}</td>
+                                    <td
+                                        class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                        {{ c.location }}</td>
+                                    <td
+                                        class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2 last:border-b-0">
+                                        {{ c.instructor }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -103,25 +123,43 @@
                     <h2 class="font-jura text-[1.2rem] font-bold text-brand-blue mb-3">Saved Schedule</h2>
 
                     {% if schedule %}
-                    <table class="w-full border-collapse font-inter text-[0.85rem] bg-white rounded-[10px] overflow-hidden max-md:text-[0.75rem]">
+                    <table
+                        class="w-full border-collapse font-inter text-[0.85rem] bg-white rounded-[10px] overflow-hidden max-md:text-[0.75rem]">
                         <thead>
                             <tr>
                                 {% for col in ['CRN','Course','Title','Days','Time','Location','Instructor',''] %}
-                                <th class="bg-brand-blue text-brand-yellow font-jura text-[0.8rem] uppercase tracking-[0.04em] py-[0.6rem] px-3 text-left whitespace-nowrap max-md:py-[0.4rem] max-md:px-2">{{ col }}</th>
+                                <th
+                                    class="bg-brand-blue text-brand-yellow font-jura text-[0.8rem] uppercase tracking-[0.04em] py-[0.6rem] px-3 text-left whitespace-nowrap max-md:py-[0.4rem] max-md:px-2">
+                                    {{ col }}</th>
                                 {% endfor %}
                             </tr>
                         </thead>
                         <tbody>
                             {% for c in schedule %}
                             <tr class="hover:[&>td]:bg-brand-cream">
-                                <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.crn }}</td>
-                                <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.subject }} {{ c.course_num }}</td>
-                                <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.name }}</td>
-                                <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.days }}</td>
-                                <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.time }}</td>
-                                <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.location }}</td>
-                                <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">{{ c.instructor }}</td>
-                                <td class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                <td
+                                    class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                    {{ c.crn }}</td>
+                                <td
+                                    class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                    {{ c.subject }} {{ c.course_num }}</td>
+                                <td
+                                    class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                    {{ c.name }}</td>
+                                <td
+                                    class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                    {{ c.days }}</td>
+                                <td
+                                    class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                    {{ c.time }}</td>
+                                <td
+                                    class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                    {{ c.location }}</td>
+                                <td
+                                    class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
+                                    {{ c.instructor }}</td>
+                                <td
+                                    class="py-[0.55rem] px-3 border-b border-brand-slate text-black align-middle max-md:py-[0.4rem] max-md:px-2">
                                     <form method="post" action="/schedule" class="inline">
                                         <input type="hidden" name="action" value="remove">
                                         <input type="hidden" name="crn" value="{{ c.crn }}">
@@ -136,7 +174,8 @@
                         </tbody>
                     </table>
                     {% else %}
-                    <p class="font-inter text-[0.9rem] text-brand-blue opacity-70">No courses saved yet. Look up some CRNs above.</p>
+                    <p class="font-inter text-[0.9rem] text-brand-blue opacity-70">No courses saved yet. Look up some
+                        CRNs above.</p>
                     {% endif %}
                 </div>
 
