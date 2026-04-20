@@ -505,19 +505,28 @@ dependencies = [
 requires-dist = [
     { name = "google-genai", specifier = ">=1.72.0" },
     { name = "google-generativeai", specifier = ">=0.8.6" },
-    { name = "kindling", git = "https://github.com/Monster0506/kindling.git?rev=ac0b98c" },
+    { name = "kindling", editable = "/home/tj/Documents/kindling" },
     { name = "multipart", specifier = ">=1.3.1" },
 ]
 
 [[package]]
 name = "kindling"
 version = "0.1.0"
-source = { git = "https://github.com/Monster0506/kindling.git?rev=ac0b98c#ac0b98cd0616180ea9ab18524e6ef2695c7af052" }
+source = { editable = "/home/tj/Documents/kindling" }
 dependencies = [
     { name = "h11" },
     { name = "jinja2" },
     { name = "signals" },
 ]
+
+[package.metadata]
+requires-dist = [
+    { name = "h11" },
+    { name = "jinja2", specifier = ">=3" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8" },
+    { name = "signals", editable = "../../../../../Documents/kindling/signals" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "markupsafe"
@@ -731,7 +740,11 @@ wheels = [
 [[package]]
 name = "signals"
 version = "0.1.0"
-source = { git = "https://github.com/Monster0506/kindling.git?subdirectory=signals&rev=ac0b98c#ac0b98cd0616180ea9ab18524e6ef2695c7af052" }
+source = { editable = "../../../../../Documents/kindling/signals" }
+
+[package.metadata]
+requires-dist = [{ name = "pytest", marker = "extra == 'dev'", specifier = ">=8" }]
+provides-extras = ["dev"]
 
 [[package]]
 name = "sniffio"

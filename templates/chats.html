@@ -43,14 +43,13 @@
 
     {% with active_nav = 'chats' %}{% include '_nav.html' %}{% endwith %}
 
-    <main class="w-full h-full relative flex items-center justify-center">
+    <main class="w-full h-full relative flex flex-col items-center pt-16 pb-4 px-4 gap-3">
         {% include '_bolt_bg.html' %}
 
-        <div class="relative z-10 flex flex-col items-center gap-4 p-6">
-            <h1 class="font-jura font-bold text-white m-0 text-[clamp(1.8rem,4vw,2.8rem)] [text-shadow:0_1px_6px_rgba(2,54,114,0.7),0_2px_14px_rgba(2,54,114,0.4)]">Chats</h1>
+        <h1 class="relative z-10 font-jura font-bold text-white m-0 text-[clamp(1.5rem,3vw,2.2rem)] shrink-0 [text-shadow:0_1px_6px_rgba(2,54,114,0.7),0_2px_14px_rgba(2,54,114,0.4)]">Chats</h1>
 
             <!-- Chat panel -->
-            <div class="relative z-10 grid w-[min(90vw,820px)] sm:h-[min(80vh,600px)] bg-brand-slate rounded-2xl overflow-hidden grid-cols-1 sm:grid-cols-[260px_1fr]">
+            <div class="relative z-10 flex-1 min-h-0 grid w-[min(90vw,820px)] bg-brand-slate rounded-2xl overflow-hidden grid-cols-1 sm:grid-cols-[260px_1fr]">
 
                 <!-- Sidebar: match list -->
                 <div class="border-b-2 sm:border-b-0 sm:border-r-2 border-[rgba(2,54,114,0.15)] overflow-y-auto flex flex-col gap-2 p-3 sm:max-h-none max-h-[160px]">
@@ -157,49 +156,141 @@
                 </div>
 
             </div>
-        </div>
     </main>
 
 </div>
 
 <script>
-var el = document.getElementById('messages');
-if (el) el.scrollTop = el.scrollHeight;
-
-var chatForm = document.getElementById('chat-form');
-if (chatForm) {
-    chatForm.querySelector('input[name="body"]').addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            if (this.value.trim()) chatForm.submit();
-        }
-    });
-}
-
 (function () {
-    var card = document.getElementById('icebreaker-card');
-    if (!card || !card.classList.contains('icebreaker-loading')) return;
-
     var matchId = {{ active.id if active else 'null' }};
-    if (!matchId) return;
+    var userId  = {{ user_id }};
 
-    var es = new EventSource('/_icebreaker/stream');
-    es.onmessage = function (e) {
-        var data = JSON.parse(e.data);
-        if (data.match_id !== matchId) return;
-        es.close();
-        card.classList.remove('icebreaker-loading');
-        card.innerHTML =
-            '<span class="icebreaker-label">\u2736 Icebreaker</span>' +
-            '<p class="icebreaker-body">' + data.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p>';
-    };
-    es.onerror = function () {
-        es.close();
-        card.classList.remove('icebreaker-loading');
-        card.innerHTML =
-            '<span class="icebreaker-label">\u2736 Icebreaker</span>' +
-            '<p class="icebreaker-body" style="opacity:0.7;font-style:italic;">Could not generate icebreaker. Say hello!</p>';
-    };
+    // Scroll messages to bottom on load
+    var messagesEl = document.getElementById('messages');
+    if (messagesEl) messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    // --- Append a message bubble to the messages pane ---
+    function appendMessage(body, senderId, sentAt) {
+        if (!messagesEl) return;
+        var isMe = (senderId === userId);
+
+        var wrapper = document.createElement('div');
+        wrapper.className = 'flex flex-col ' + (isMe ? 'items-end' : 'items-start') + ' gap-[2px]';
+
+        var bubble = document.createElement('div');
+        bubble.className = [
+            'max-w-[65%] py-[0.55rem] px-[0.9rem] font-inter text-[0.9rem] leading-[1.45] break-words',
+            isMe
+                ? 'bg-brand-blue text-brand-cream rounded-tl-2xl rounded-tr-2xl rounded-bl-2xl rounded-br-[4px]'
+                : 'bg-white text-black rounded-tl-[4px] rounded-tr-2xl rounded-bl-2xl rounded-br-2xl'
+        ].join(' ');
+        bubble.textContent = body;
+        wrapper.appendChild(bubble);
+
+        if (sentAt) {
+            var ts = document.createElement('span');
+            ts.className = 'font-inter text-[0.68rem] opacity-50 text-brand-blue px-1';
+            ts.textContent = String(sentAt).slice(0, 16);
+            wrapper.appendChild(ts);
+        }
+
+        messagesEl.appendChild(wrapper);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    // --- Intercept the send form ---
+    var chatForm = document.getElementById('chat-form');
+    var bodyInput = chatForm ? chatForm.querySelector('input[name="body"]') : null;
+
+    if (chatForm && bodyInput && matchId) {
+        chatForm.addEventListener('submit', function (e) {
+            // Stop the base.html submit handler from disabling the button
+            e.stopPropagation();
+            e.preventDefault();
+
+            var text = bodyInput.value.trim();
+            if (!text) return;
+
+            // Optimistic append for the sender
+            appendMessage(text, userId, new Date().toISOString().slice(0, 16));
+            bodyInput.value = '';
+            bodyInput.focus();
+
+            var params = new URLSearchParams();
+            params.set('match_id', String(matchId));
+            params.set('body', text);
+
+            fetch('/chats/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString(),
+                credentials: 'same-origin',
+            });
+        });
+
+        // Enter key triggers the submit event (so the handler above runs)
+        bodyInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (this.value.trim()) chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
+    }
+
+    // --- SSE: receive live messages from the other person ---
+    if (matchId) {
+        var chatEs = new EventSource('/_chat/stream');
+        chatEs.onmessage = function (e) {
+            var data;
+            try { data = JSON.parse(e.data); } catch (_) { return; }
+            if (!data || data.type !== 'message') return;
+            if (data.match_id !== matchId) return;
+
+            appendMessage(data.body, data.sender_id, data.sent_at);
+
+            // Mark as read since the user is actively viewing this chat
+            var p = new URLSearchParams();
+            p.set('match_id', String(matchId));
+            fetch('/_chat/mark-read', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: p.toString(),
+                credentials: 'same-origin',
+            });
+        };
+    }
+
+    // --- Icebreaker SSE ---
+    (function () {
+        var card = document.getElementById('icebreaker-card');
+        if (!card || !card.classList.contains('icebreaker-loading')) return;
+        if (!matchId) return;
+
+        var es = new EventSource('/_icebreaker/stream');
+        es.onmessage = function (e) {
+            var data = JSON.parse(e.data);
+            if (data.match_id !== matchId) return;
+            es.close();
+            card.classList.remove('icebreaker-loading');
+            card.innerHTML =
+                '<div class="flex items-center justify-between mb-[0.35rem]">' +
+                '<span class="icebreaker-label" style="margin-bottom:0;">\u2736 Icebreaker</span>' +
+                '<form method="post" action="/chats/regenerate" style="margin:0;">' +
+                '<input type="hidden" name="match_id" value="' + matchId + '">' +
+                '<button type="submit" title="Generate a new icebreaker" style="background:transparent;border:none;cursor:pointer;color:rgba(255,255,255,0.6);font-size:0.75rem;padding:0;font-family:\'Inter\',sans-serif;">' +
+                '\u21bb new</button></form></div>' +
+                '<p class="icebreaker-body">' +
+                data.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                '</p>';
+        };
+        es.onerror = function () {
+            es.close();
+            card.classList.remove('icebreaker-loading');
+            card.innerHTML =
+                '<span class="icebreaker-label">\u2736 Icebreaker</span>' +
+                '<p class="icebreaker-body" style="opacity:0.7;font-style:italic;">Could not generate icebreaker. Say hello!</p>';
+        };
+    })();
 })();
 </script>
 {% endblock %}

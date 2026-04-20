@@ -12,4 +12,4 @@ dependencies = [
 ]
 
 [tool.uv.sources]
-kindling = { git = "https://github.com/Monster0506/kindling.git", rev = "ac0b98c" }
+kindling = { path = "/home/tj/Documents/kindling", editable = true }

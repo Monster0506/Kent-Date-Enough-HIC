@@ -40,17 +40,52 @@ import queue
 import threading
 
 from kindling import Application
-from kindling.reactive import on, signal
+from kindling.reactive import expose, on, signal
 from kindling.streaming import StreamedHttpResponse
 from urllib.parse import quote as _url_quote
-from kindling.response import Response, redirect
+from kindling.response import Response, json_response, redirect
 from session import clear_session_header, get_session, set_session_header
 
 _icebreaker_subscribers: list[queue.SimpleQueue] = []
 _icebreaker_lock = threading.Lock()
 
+# Per-user queues for live chat delivery
+_chat_queues: dict[int, list[queue.SimpleQueue]] = {}
+_chat_lock = threading.Lock()
+
+
+def _register_chat_queue(user_id: int) -> queue.SimpleQueue:
+    q: queue.SimpleQueue = queue.SimpleQueue()
+    with _chat_lock:
+        _chat_queues.setdefault(user_id, []).append(q)
+    return q
+
+
+def _unregister_chat_queue(user_id: int, q: queue.SimpleQueue) -> None:
+    with _chat_lock:
+        lst = _chat_queues.get(user_id, [])
+        try:
+            lst.remove(q)
+        except ValueError:
+            pass
+
+
+def _push_chat_event(recipient_id: int, match_id: int, sender_id: int, body: str, sent_at: str) -> None:
+    payload = json.dumps({
+        "type": "message",
+        "match_id": match_id,
+        "sender_id": sender_id,
+        "body": body,
+        "sent_at": sent_at,
+    })
+    with _chat_lock:
+        queues = list(_chat_queues.get(recipient_id, []))
+    for q in queues:
+        q.put_nowait(payload)
+
 
 def _broadcast_icebreaker(match_id: int, text: str) -> None:
+
     payload = json.dumps({"match_id": match_id, "text": text})
     with _icebreaker_lock:
         subscribers = list(_icebreaker_subscribers)
@@ -97,10 +132,11 @@ def landing(req):
     return app.render("landing.html")
 
 
-with app.reactive("signup", path="/signup", template="signup.html") as _signup:
+@app.reactive("signup", path="/signup", template="signup.html")
+def _signup_scope() -> None:
     _error = signal("")
     _success = signal(False)
-    _signup.expose(error=_error, success=_success)
+    expose(error=_error, success=_success)
 
     @on("signup-form", "submit")
     def handle_signup(req):
@@ -337,6 +373,68 @@ def icebreaker_stream(_req):
     return StreamedHttpResponse(200, headers, _generate())
 
 
+@app.get("/_chat/stream")
+def chat_stream(req):
+    user_id = get_session(req)
+    if not user_id:
+        return Response(status=401, headers=(("Content-Type", "text/plain"),), body=b"Unauthorized")
+
+    def _generate():
+        q = _register_chat_queue(user_id)
+        try:
+            while True:
+                try:
+                    msg = q.get(timeout=20.0)
+                    yield f"data: {msg}\n\n".encode()
+                except queue.Empty:
+                    yield b": ping\n\n"
+        finally:
+            _unregister_chat_queue(user_id, q)
+
+    headers = (
+        ("Content-Type", "text/event-stream; charset=utf-8"),
+        ("Cache-Control", "no-cache"),
+        ("Connection", "keep-alive"),
+        ("X-Accel-Buffering", "no"),
+    )
+    return StreamedHttpResponse(200, headers, _generate())
+
+
+@app.post("/chats/send")
+def chats_send(req):
+    from datetime import datetime, timezone
+    user_id = get_session(req)
+    if not user_id:
+        return json_response({"error": "unauthorized"}, status=401)
+    match_id = int(req.form_value("match_id") or 0)
+    body_text = (req.form_value("body") or "").strip()
+    if not match_id or not body_text:
+        return json_response({"error": "invalid"}, status=400)
+    a_id, b_id = get_match_user_ids(match_id)
+    if user_id not in (a_id, b_id):
+        return json_response({"error": "forbidden"}, status=403)
+
+    send_message(match_id, user_id, body_text)
+    mark_messages_read(user_id, match_id)
+    sent_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+
+    recipient_id = b_id if user_id == a_id else a_id
+    _push_chat_event(recipient_id, match_id, user_id, body_text, sent_at)
+
+    return json_response({"ok": True})
+
+
+@app.post("/_chat/mark-read")
+def chat_mark_read(req):
+    user_id = get_session(req)
+    if not user_id:
+        return Response(status=401, headers=(("Content-Type", "text/plain"),), body=b"Unauthorized")
+    match_id = int(req.form_value("match_id") or 0)
+    if match_id:
+        mark_messages_read(user_id, match_id)
+    return Response(status=204, headers=(("Content-Length", "0"),), body=b"")
+
+
 @app.post("/discover")
 def discover_post(req):
     user_id = get_session(req)
@@ -422,13 +520,19 @@ def chats_regenerate(req):
 
 @app.post("/chats")
 def chats_post(req):
+    from datetime import datetime, timezone
     user_id = get_session(req)
     if not user_id:
         return redirect("/login")
     match_id = int(req.form_value("match_id") or 0)
-    body = (req.form_value("body") or "").strip()
-    if match_id and body:
-        send_message(match_id, user_id, body)
+    body_text = (req.form_value("body") or "").strip()
+    if match_id and body_text:
+        a_id, b_id = get_match_user_ids(match_id)
+        if user_id in (a_id, b_id):
+            send_message(match_id, user_id, body_text)
+            sent_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
+            recipient_id = b_id if user_id == a_id else a_id
+            _push_chat_event(recipient_id, match_id, user_id, body_text, sent_at)
     return redirect(f"/chats?match={match_id}")
 
 
