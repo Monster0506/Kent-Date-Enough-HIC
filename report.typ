@@ -443,11 +443,22 @@ who exchange many messages per session never need to reach for the Send button.
 #rule("Offer Informative Feedback")
 - While the Gemini API streams the icebreaker text, a shimmer (skeleton-loader)
   animation fills the icebreaker card so the user knows content is loading
-  rather than assuming the feature is broken. If the SSE stream fails, an
-  explicit error message replaces the shimmer, the user is
-  never left staring at an infinite animation.
+  rather than assuming the feature is broken. Once the icebreaker arrives via
+  SSE it is injected into the card along with the *↻ new* regenerate button,
+  which only appears after content is present. If the SSE stream fails, an
+  explicit error message replaces the shimmer; the user is never left staring
+  at an infinite animation.
+- When the user sends a message the bubble appears in the conversation
+  immediately (optimistic append) before the server confirms, so there is no
+  perceptible delay or page reload. Incoming messages from the other person
+  are pushed via a dedicated Server-Sent Events stream and appended in real
+  time; the user never has to reload to see a reply.
+- Incoming messages are marked as read automatically the moment they are
+  delivered via SSE, keeping the notification badge accurate without any
+  manual action.
 - The conversation pane auto-scrolls to the newest message on open and on each
-  new send, keeping the latest content in view without manual scrolling.
+  new send or receive, keeping the latest content in view without manual
+  scrolling.
 - The match-count label in the sidebar header tells users at a glance how many
   active matches they have.
 
@@ -476,9 +487,13 @@ cryptic usernames to remembered faces.
 
 - Click a *match name or photo* in the sidebar to open that conversation.
 - Read the *icebreaker card* at the top of the conversation; if it is still
-  loading, a shimmer animation indicates progress.
+  loading, a shimmer animation indicates progress. Once loaded, the
+  *↻ new* button appears on the card.
 - Click *↻ new* to discard the current icebreaker and generate a fresh one.
-- Type a message and press *Enter* or click the paper-plane *Send* button.
+- Type a message and press *Enter* or click the paper-plane *Send* button;
+  the bubble appears instantly in the conversation without a page reload.
+- Messages from the other person appear in real time via SSE push; no refresh
+  is needed to receive them.
 - Click a match's *name* in the conversation header to navigate to their full
   profile view.
 - Click *Unmatch* and confirm the dialog to end the match and remove the
@@ -831,9 +846,11 @@ reading labels.
 
 #rule("Enable Frequent Users to Use Shortcuts")
 The *Escape key* closes the sidebar immediately. Clicking any navigation link
-navigates instantly without a confirmation step. These two keyboard behaviours
-allow frequent users to open and dismiss the
-sidebar without reaching for the mouse.
+navigates instantly without a confirmation step. Pressing *?* from any page
+opens a floating help overlay that lists every keyboard shortcut in the
+application. These behaviours allow frequent users to open and dismiss the
+sidebar, navigate the whole app, and recall shortcuts without reaching for
+the mouse.
 
 #rule("Offer Informative Feedback")
 The notification bell icon carries a live numeric badge showing the count of
@@ -861,4 +878,82 @@ to the session lifecycle.
 - Close the sidebar by clicking the *× button*, clicking the *overlay*, or
   pressing *Escape*.
 - Click *Log Out* and confirm the dialog to end the session.
+
+// ─────────────────────────────────────────────────────────────────────────────
+== Global Keyboard Shortcuts (All Authenticated Pages)
+// ─────────────────────────────────────────────────────────────────────────────
+
+=== Purpose
+
+Every page in the application includes a global keyboard shortcut layer. Single
+key presses jump to any section without opening the sidebar. Pressing *?*
+opens a floating help overlay that lists every binding, grouped into Navigation,
+Account, and Utility categories, with styled `kbd` chips for each key. Shortcuts
+are suppressed automatically while focus is inside any input, textarea, or
+select element so they never interfere with form entry. Escape is the one
+exception: it always fires and dismisses whatever is active — a modal, the
+shortcuts overlay, or the currently focused element.
+
+=== Screenshot
+
+#screenshot("screenshots/14-keyboard-shortcuts.png", "Keyboard shortcuts overlay: the ? help panel listing all bindings grouped by Navigation, Account, and Utility.")
+
+=== Keyboard Shortcut Reference
+
+#table(
+  columns: (auto, 1fr),
+  inset: 6pt,
+  stroke: 0.4pt + luma(160),
+  [*Key*], [*Action*],
+  [*Navigation*], [],
+  [`h`], [Go to Landing / Home],
+  [`d`], [Go to Discover],
+  [`c`], [Go to Chats],
+  [`n`], [Go to Notifications],
+  [`p`], [Go to My Profile],
+  [`s`], [Go to My Schedule],
+  [`t`], [Go to Testimonials],
+  [*Account*], [],
+  [`,`], [Go to Settings],
+  [`Shift+L`], [Go to Login],
+  [`Shift+R`], [Go to Sign Up],
+  [*Utility*], [],
+  [`Escape`], [Close modal / dismiss overlay / blur focused element],
+  [`?`], [Toggle keyboard shortcuts help overlay],
+)
+
+=== Golden Rules
+
+#rule("Enable Frequent Users to Use Shortcuts")
+The shortcut system exists solely for returning users who have internalised
+the application's layout. A first-time visitor can ignore every binding
+entirely. An experienced user can navigate across all seven major sections,
+reach Settings, and trigger or dismiss the help overlay without any mouse
+interaction. The single-letter mnemonics map directly to page names
+(d=Discover, c=Chats, n=Notifications, p=Profile, s=Schedule, t=Testimonials),
+keeping the set learnable.
+
+#rule("Reduce Short-Term Memory Load")
+Because the shortcuts are not labelled on screen, the *?* overlay externalises
+the complete list so users never have to memorise all twelve bindings at once.
+Grouping the overlay into three sections (Navigation, Account, Utility) reduces
+the scanning cost: a user looking for a navigation shortcut does not need to
+read the utility bindings.
+
+#rule("Offer Informative Feedback")
+Opening the overlay provides immediate visual confirmation that the shortcut
+system is active and shows exactly which keys are bound. Closing the overlay
+with Escape, the Close button, or the backdrop collapses it instantly, giving
+clear feedback that the application returned to its normal state.
+
+=== User Interactions
+
+- Press any navigation key (`h`, `d`, `c`, `n`, `p`, `s`, `t`) while not
+  typing in a field to jump directly to the corresponding page.
+- Press *,* to go to Settings; *Shift+L* to go to Login; *Shift+R* to go
+  to Sign Up.
+- Press *?* to open the shortcuts overlay; press *Escape*, click *Close*,
+  or click the backdrop to dismiss it.
+- All shortcuts except Escape are suppressed when focus is inside an input,
+  textarea, or select element.
 
